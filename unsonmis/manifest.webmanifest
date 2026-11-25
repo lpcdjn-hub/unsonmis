@@ -1,0 +1,26 @@
+{
+  "id": "./",
+  "name": "UNSONMIS — Musique & Webradios",
+  "short_name": "UNSONMIS",
+  "description": "On n'arrête pas un peuple qui danse — lecteur audio et webradios.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0c0c0c",
+  "theme_color": "#111111",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

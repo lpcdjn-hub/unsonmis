@@ -1,0 +1,18 @@
+# UNSONMIS — version installable (PWA)
+
+Ce dossier contient la version web préparée pour être installée comme une application sur Android, iPhone et ordinateur.
+
+## Publication nécessaire
+Une PWA doit être publiée sur une adresse HTTPS. Le simple fichier HTML ou le ZIP ne peut pas, à lui seul, installer une application sur le téléphone.
+
+Publiez **tout le contenu de ce dossier** sur un hébergement HTTPS en conservant les dossiers et noms de fichiers.
+
+## Installation sur Android
+1. Ouvrir l'adresse HTTPS du site avec Chrome.
+2. Appuyer sur « Installer l'application » si Chrome le propose, ou menu ⋮ > « Installer l'application » / « Ajouter à l'écran d'accueil ».
+3. L'icône UNSONMIS apparaît alors sur l'écran d'accueil.
+
+## À savoir
+- Le lecteur, les flux radio et la recherche Audius nécessitent Internet.
+- Le service worker met en cache l'interface de base ; il ne télécharge pas les morceaux ni les radios pour une écoute hors ligne.
+- Ce paquet n'est pas un APK Android signé. Il s'agit d'une PWA installable après publication HTTPS.
