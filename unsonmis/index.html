@@ -484,6 +484,7 @@
     <label class="action-pill primary" for="localFilesInput">📁 + Fichiers locaux</label>
     <input type="file" id="localFilesInput" accept="audio/*" multiple class="hidden">
     <button class="action-pill" id="installPwaBtn">📲 Installer l'appli (PWA)</button>
+    <button class="action-pill red" id="shareAppBtn" type="button">↗️ Partager l’application</button>
   </div>
 </header>
 
@@ -663,6 +664,38 @@ window.addEventListener("appinstalled", () => {
   const button = document.getElementById("installPwaBtn");
   if (button) button.textContent = "✓ UNSONMIS installée";
 });
+
+// --- PARTAGE DE L'APPLICATION ---
+const shareAppButton = document.getElementById("shareAppBtn");
+if (shareAppButton) {
+  shareAppButton.addEventListener("click", async () => {
+    const shareData = {
+      title: "UNSONMIS",
+      text: "Découvre UNSONMIS — On n’arrête pas un peuple qui danse !",
+      url: "https://lpcdjn-hub.github.io/unsonmis/"
+    };
+    try {
+      if (navigator.share) await navigator.share(shareData);
+      else if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(shareData.url);
+        alert("Lien de UNSONMIS copié ! Tu peux maintenant le partager.");
+      } else {
+        const field = document.createElement("textarea");
+        field.value = shareData.url;
+        field.setAttribute("readonly", "");
+        field.style.position = "fixed";
+        field.style.opacity = "0";
+        document.body.appendChild(field);
+        field.select();
+        const copied = document.execCommand("copy");
+        field.remove();
+        alert(copied ? "Lien de UNSONMIS copié !" : "Copie ce lien : " + shareData.url);
+      }
+    } catch (error) {
+      if (error.name !== "AbortError") alert("Pour partager UNSONMIS, copie ce lien : " + shareData.url);
+    }
+  });
+}
 
 // --- STATE ---
 const audio = document.getElementById("audioEl");
