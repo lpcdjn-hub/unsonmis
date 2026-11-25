@@ -1184,7 +1184,7 @@ document.getElementById("communitySignupBtn").onclick=async()=>{
  const email=document.getElementById("communityEmail").value.trim(),password=document.getElementById("communityPassword").value;
  if(!email||password.length<8){communityMessage("Indiquez un e-mail et un mot de passe d'au moins 8 caractères.",true);return;}
  communityMessage("Création du compte…");
- const {data,error}=await communityClient.auth.signUp({email,password});
+ const {data,error}=await communityClient.auth.signUp({email,password,options:{emailRedirectTo:"https://lpcdjn-hub.github.io/unsonmis/"}});
  if(error){communityMessage(error.message,true);return;}
  if(data.session){await refreshCommunityAuth();communityMessage("Compte créé. Bienvenue !");}
  else communityMessage("Compte créé. Vérifiez votre e-mail pour confirmer l'inscription, puis connectez-vous.");
