@@ -1,0 +1,11 @@
+const SUPABASE_URL='https://rlzunpnwtnkxmnygnkvv.supabase.co';
+const SUPABASE_KEY='sb_publishable_3eXxDChcMApOgp6TmKQ0QA_1z2VKhOE';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const $=id=>document.getElementById(id); const status=(m,ok=false)=>{ $('status').textContent=m; $('status').className=ok?'success':'error'; };
+function showSession(session){$('auth').classList.toggle('hidden',!!session);$('dashboard').classList.toggle('hidden',!session);if(session){$('userline').textContent=session.user.email;loadProfile(session.user.id);}}
+async function loadProfile(id){const {data,error}=await sb.from('profiles').select('username,bio').eq('id',id).maybeSingle();if(error){status('Connecté. Profil à initialiser : '+error.message);return;}if(data){$('username').value=data.username||'';$('bio').value=data.bio||'';}}
+$('signup').onclick=async()=>{if(!$('adult').checked){status('Confirmation 18+ obligatoire pour créer un compte dans l’espace adulte.');return;}const email=$('email').value.trim(),password=$('password').value;if(!email||password.length<8){status('Entre un email et un mot de passe de 8 caractères minimum.');return;}const {data,error}=await sb.auth.signUp({email,password,options:{data:{adult_confirmed:true}}});if(error){status(error.message);return;}status(data.session?'Compte créé et connecté.':'Compte créé. Vérifie ton email pour confirmer ton inscription.',true);if(data.session)showSession(data.session);};
+$('login').onclick=async()=>{const {data,error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error){status(error.message);return;}status('Connexion réussie.',true);showSession(data.session);};
+$('logout').onclick=async()=>{await sb.auth.signOut();showSession(null);status('Déconnexion effectuée.',true);};
+$('saveprofile').onclick=async()=>{const {data:{user}}=await sb.auth.getUser();if(!user){status('Reconnecte-toi.');return;}const payload={id:user.id,username:$('username').value.trim(),bio:$('bio').value.trim()};const {error}=await sb.from('profiles').upsert(payload);if(error)status('Erreur profil : '+error.message);else status('Profil enregistré.',true);};
+sb.auth.getSession().then(({data})=>showSession(data.session));sb.auth.onAuthStateChange((_event,session)=>showSession(session));
