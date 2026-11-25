@@ -446,10 +446,28 @@
     cursor: pointer;
   }
 
+
+  .tabs{flex-wrap:wrap}.tab-btn{flex:1 1 130px}
+  .community-panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px}
+  .community-panel h2,.community-panel h3{color:var(--yellow);margin-bottom:10px}
+  .community-panel p,.community-note{color:var(--muted);font-size:.84rem;line-height:1.5;margin-bottom:12px}
+  .community-form{display:grid;gap:9px;margin:12px 0 18px}
+  .community-form input:not([type=file]):not([type=checkbox]){width:100%;min-width:0;background:#111;border:1px solid var(--border);color:var(--text);padding:11px 12px;border-radius:7px;font-size:.9rem}
+  .community-form input[type=file]{width:100%;color:var(--muted);font-size:.85rem}
+  .community-form button,.community-actions button{background:var(--red);color:white;border:0;border-radius:7px;padding:10px 13px;font-weight:700;cursor:pointer}
+  .community-form button.secondary,.community-actions button.secondary{background:#333}
+  .community-check{display:flex;gap:8px;align-items:flex-start;color:var(--muted);font-size:.8rem;line-height:1.4}
+  .community-check input{margin-top:3px}
+  .community-status{min-height:1.4em;color:var(--yellow);font-size:.84rem;margin:8px 0}
+  .community-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .community-admin-item{border:1px solid var(--border);border-radius:8px;padding:10px;margin:8px 0}
+  .community-divider{border:0;border-top:1px solid var(--border);margin:18px 0}
+
   .hidden { display: none !important; }
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
 <meta name="theme-color" content="#111111">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -473,6 +491,7 @@
   <button class="tab-btn active" data-tab="radios">📻 Webradios (Tous styles)</button>
   <button class="tab-btn" data-tab="tracks">🎵 Découvertes Audius</button>
   <button class="tab-btn" data-tab="local">💾 Mes Sons (<span id="localCount">0</span>)</button>
+  <button class="tab-btn" data-tab="community">🎤 Communauté</button>
 </div>
 
 <div class="container">
@@ -538,6 +557,49 @@
         </div>
       </div>
     </div>
+  </div>
+
+
+  <div id="tab-community" class="hidden">
+    <section class="community-panel">
+      <h2>🎤 La communauté UNSONMIS</h2>
+      <p>Partagez gratuitement vos créations musicales avec les auditeurs. Un compte gratuit est nécessaire pour envoyer un morceau.</p>
+      <div id="communityAuth">
+        <div id="communityAuthForms" class="community-form">
+          <input type="email" id="communityEmail" placeholder="Votre adresse e-mail" autocomplete="email">
+          <input type="password" id="communityPassword" placeholder="Mot de passe (8 caractères minimum)" minlength="8" autocomplete="current-password">
+          <div class="community-actions">
+            <button id="communityLoginBtn" type="button">Se connecter</button>
+            <button id="communitySignupBtn" class="secondary" type="button">Créer un compte gratuit</button>
+          </div>
+        </div>
+        <div id="communityUserBar" class="hidden">
+          <p id="communityWelcome"></p>
+          <button id="communityLogoutBtn" class="secondary" type="button">Se déconnecter</button>
+        </div>
+      </div>
+      <div id="communityUploadArea" class="hidden">
+        <hr class="community-divider">
+        <h3>＋ Proposer un morceau</h3>
+        <form id="communityUploadForm" class="community-form">
+          <input type="text" id="communityTitle" maxlength="120" placeholder="Titre du morceau" required>
+          <input type="text" id="communityArtist" maxlength="120" placeholder="Artiste / nom du groupe" required>
+          <input type="file" id="communityAudioFile" accept=".mp3,.m4a,.aac,.wav,.ogg,.flac,audio/mpeg,audio/mp4,audio/aac,audio/wav,audio/ogg,audio/flac" required>
+          <label class="community-check"><input type="checkbox" id="communityRights" required> Je confirme être l'auteur ou disposer des autorisations nécessaires pour partager ce morceau gratuitement.</label>
+          <button id="communityUploadBtn" type="submit">Envoyer gratuitement</button>
+        </form>
+        <p class="community-note">MP3, M4A, AAC, WAV, OGG ou FLAC · 25 Mo maximum. Chaque morceau est vérifié avant publication. N'envoyez que des titres que vous avez le droit de partager.</p>
+      </div>
+      <div id="communityStatus" class="community-status" role="status" aria-live="polite"></div>
+      <hr class="community-divider">
+      <h3>🎶 Morceaux partagés</h3>
+      <p class="community-note">Les morceaux validés sont accessibles gratuitement à tous.</p>
+      <div id="communityTrackList" class="track-list"></div>
+      <div id="communityModeration" class="hidden">
+        <hr class="community-divider"><h3>🛡️ Modération Super-Admin</h3>
+        <div id="communityPendingList" class="track-list"></div>
+      </div>
+    </section>
   </div>
 
 </div>
@@ -1029,6 +1091,7 @@ function switchTab(tabName) {
   document.getElementById("tab-radios").classList.toggle("hidden", tabName !== "radios");
   document.getElementById("tab-tracks").classList.toggle("hidden", tabName !== "tracks");
   document.getElementById("tab-local").classList.toggle("hidden", tabName !== "local");
+  document.getElementById("tab-community").classList.toggle("hidden", tabName !== "community");
 }
 
 document.querySelectorAll(".tab-btn").forEach(btn => {
@@ -1047,6 +1110,132 @@ document.getElementById("installPwaBtn").onclick = async () => {
 document.getElementById("closePwaModal").onclick = () => {
   document.getElementById("pwaModal").classList.remove("open");
 };
+
+
+/* UNSONMIS COMMUNITY CATALOGUE */
+const communityClient = window.supabase.createClient(
+  "https://psyxuwzttpkuvgwfrhtr.supabase.co",
+  "sb_publishable_PVgbaDBneCdH7YdqoDZMbw_BB2etGUf"
+);
+let communityUser=null, communityIsAdmin=false;
+function communityMessage(message,isError=false){
+ const el=document.getElementById("communityStatus");
+ el.textContent=message; el.style.color=isError?"#ff7777":"var(--yellow)";
+}
+function communityCard(track,pending=false){
+ const card=document.createElement("div"); card.className="card-item";
+ const art=document.createElement("div"); art.className="art-box"; art.textContent="🎵";
+ const meta=document.createElement("div"); meta.className="item-meta";
+ const title=document.createElement("div"); title.className="item-title"; title.textContent=track.title;
+ const artist=document.createElement("div"); artist.className="item-sub";
+ artist.textContent=track.artist+(pending?" · En attente de validation":"");
+ meta.append(title,artist); card.append(art,meta);
+ if(!pending){
+  const badge=document.createElement("span"); badge.className="badge"; badge.textContent="COMMUNAUTÉ"; card.append(badge);
+  card.addEventListener("click",()=>{
+   const url=communityClient.storage.from("community-audio").getPublicUrl(track.storage_path).data.publicUrl;
+   playFromQueue([{title:track.title,artist:track.artist,url,isLive:false}],0);
+  });
+ }
+ return card;
+}
+async function loadCommunityTracks(){
+ const list=document.getElementById("communityTrackList"); list.replaceChildren();
+ const {data,error}=await communityClient.from("community_tracks").select("id,title,artist,storage_path,created_at").eq("status","approved").order("created_at",{ascending:false}).limit(100);
+ if(error){communityMessage("Le catalogue communautaire est momentanément indisponible.",true);return;}
+ if(!data?.length){const p=document.createElement("p");p.className="community-note";p.textContent="Pas encore de morceau partagé. Soyez le premier à proposer le vôtre !";list.append(p);return;}
+ data.forEach(t=>list.append(communityCard(t)));
+}
+async function loadCommunityModeration(){
+ const panel=document.getElementById("communityModeration"),list=document.getElementById("communityPendingList");
+ panel.classList.toggle("hidden",!communityIsAdmin);list.replaceChildren();if(!communityIsAdmin)return;
+ const {data,error}=await communityClient.from("community_tracks").select("id,title,artist").eq("status","pending").order("created_at").limit(100);
+ if(error){communityMessage("Impossible de charger la modération.",true);return;}
+ if(!data?.length){const p=document.createElement("p");p.className="community-note";p.textContent="Aucun morceau en attente.";list.append(p);return;}
+ data.forEach(t=>{
+  const item=document.createElement("div");item.className="community-admin-item";
+  const label=document.createElement("p");label.textContent=t.title+" — "+t.artist;
+  const actions=document.createElement("div");actions.className="community-actions";
+  const yes=document.createElement("button");yes.type="button";yes.textContent="Publier";yes.onclick=()=>moderateCommunityTrack(t.id,"approved");
+  const no=document.createElement("button");no.type="button";no.className="secondary";no.textContent="Refuser";no.onclick=()=>moderateCommunityTrack(t.id,"rejected");
+  actions.append(yes,no);item.append(label,actions);list.append(item);
+ });
+}
+async function moderateCommunityTrack(id,status){
+ const values={status};if(status==="approved"){values.approved_at=new Date().toISOString();values.approved_by=communityUser.id;}
+ const {error}=await communityClient.from("community_tracks").update(values).eq("id",id);
+ if(error){communityMessage("Action impossible : "+error.message,true);return;}
+ communityMessage(status==="approved"?"Morceau publié !":"Morceau refusé.");
+ await loadCommunityTracks();await loadCommunityModeration();
+}
+async function refreshCommunityAuth(){
+ const {data}=await communityClient.auth.getSession();communityUser=data.session?.user||null;
+ document.getElementById("communityAuthForms").classList.toggle("hidden",!!communityUser);
+ document.getElementById("communityUserBar").classList.toggle("hidden",!communityUser);
+ document.getElementById("communityUploadArea").classList.toggle("hidden",!communityUser);
+ if(communityUser){
+  document.getElementById("communityWelcome").textContent="Connecté : "+(communityUser.email||"membre UNSONMIS");
+  const {data:roles}=await communityClient.from("user_roles").select("role").eq("user_id",communityUser.id);
+  communityIsAdmin=!!roles?.some(r=>r.role==="super_admin");
+ }else communityIsAdmin=false;
+ await loadCommunityTracks();await loadCommunityModeration();
+}
+document.getElementById("communitySignupBtn").onclick=async()=>{
+ const email=document.getElementById("communityEmail").value.trim(),password=document.getElementById("communityPassword").value;
+ if(!email||password.length<8){communityMessage("Indiquez un e-mail et un mot de passe d'au moins 8 caractères.",true);return;}
+ communityMessage("Création du compte…");
+ const {data,error}=await communityClient.auth.signUp({email,password});
+ if(error){communityMessage(error.message,true);return;}
+ if(data.session){await refreshCommunityAuth();communityMessage("Compte créé. Bienvenue !");}
+ else communityMessage("Compte créé. Vérifiez votre e-mail pour confirmer l'inscription, puis connectez-vous.");
+};
+document.getElementById("communityLoginBtn").onclick=async()=>{
+ const email=document.getElementById("communityEmail").value.trim(),password=document.getElementById("communityPassword").value;
+ communityMessage("Connexion…");const {error}=await communityClient.auth.signInWithPassword({email,password});
+ if(error){communityMessage(error.message,true);return;}await refreshCommunityAuth();communityMessage("Connexion réussie.");
+};
+document.getElementById("communityLogoutBtn").onclick=async()=>{
+ await communityClient.auth.signOut();communityUser=null;communityIsAdmin=false;await refreshCommunityAuth();communityMessage("Vous êtes déconnecté.");
+};
+async function communitySha256(file){
+ const digest=await crypto.subtle.digest("SHA-256",await file.arrayBuffer());
+ return Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+document.getElementById("communityUploadForm").onsubmit=async(event)=>{
+ event.preventDefault();
+ if(!communityUser){communityMessage("Connectez-vous pour envoyer un morceau.",true);return;}
+ const file=document.getElementById("communityAudioFile").files[0],title=document.getElementById("communityTitle").value.trim(),artist=document.getElementById("communityArtist").value.trim();
+ if(!file||!title||!artist||!document.getElementById("communityRights").checked){communityMessage("Complétez le formulaire et confirmez vos droits de partage.",true);return;}
+ if(file.size>25*1024*1024){communityMessage("Le fichier dépasse la limite de 25 Mo.",true);return;}
+ const ext=(file.name.split(".").pop()||"").toLowerCase();
+ if(!["mp3","m4a","aac","wav","ogg","flac"].includes(ext)){communityMessage("Format audio non accepté.",true);return;}
+ const btn=document.getElementById("communityUploadBtn");btn.disabled=true;btn.textContent="Envoi en cours…";
+ let path=null;
+ try{
+  const hash=await communitySha256(file);
+  const {data:dupes}=await communityClient.from("community_tracks").select("id").eq("audio_sha256",hash).limit(1);
+  if(dupes?.length){communityMessage("Ce fichier est déjà présent ou attend sa validation.",true);return;}
+  path=communityUser.id+"/"+crypto.randomUUID()+"."+ext;
+  const {error:upErr}=await communityClient.storage.from("community-audio").upload(path,file,{contentType:file.type||"application/octet-stream",upsert:false,cacheControl:"3600"});
+  if(upErr)throw upErr;
+  const {error:dbErr}=await communityClient.from("community_tracks").insert({user_id:communityUser.id,title,artist,storage_path:path,audio_sha256:hash,status:"pending"});
+  if(dbErr){
+   await communityClient.storage.from("community-audio").remove([path]);path=null;
+   if(dbErr.code==="23505")throw new Error("Un morceau avec ce fichier, ce titre et cet artiste existe déjà ou attend sa validation.");
+   throw dbErr;
+  }
+  document.getElementById("communityUploadForm").reset();
+  communityMessage("Merci ! Votre morceau est envoyé et attend la validation du Super-Admin.");
+  await loadCommunityModeration();
+ }catch(error){
+  if(path)await communityClient.storage.from("community-audio").remove([path]);
+  communityMessage(error.message||"L'envoi a échoué. Réessayez.",true);
+ }finally{btn.disabled=false;btn.textContent="Envoyer gratuitement";}
+};
+communityClient.auth.onAuthStateChange(()=>setTimeout(()=>refreshCommunityAuth(),0));
+refreshCommunityAuth().catch(e=>communityMessage("Connexion au catalogue impossible : "+e.message,true));
+/* FIN COMMUNAUTÉ */
+
 
 // --- INIT ---
 renderRadios();
