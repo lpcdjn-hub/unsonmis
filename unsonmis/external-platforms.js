@@ -92,6 +92,18 @@
       audio.src = preview;
       audio.style.width = "100%";
       card.append(audio);
+      const playInMain = document.createElement("button");
+      playInMain.type = "button";
+      playInMain.className = "action-pill primary";
+      playInMain.textContent = "▶ Lire dans le lecteur UNSONMIS";
+      playInMain.addEventListener("click", () => {
+        if (typeof window.playFromQueue === "function") {
+          window.playFromQueue([{ title: title || "Titre sans nom", artist: artist || "Artiste non renseigné", url: preview, isLive: false }], 0);
+        } else {
+          audio.play().catch(() => { byline.textContent += " · Lecture impossible dans ce navigateur"; });
+        }
+      });
+      card.append(playInMain);
     }
     const link = document.createElement("a");
     link.href = url;
@@ -111,16 +123,16 @@
     const jobs = [];
 
     jobs.push((async () => {
-      const api = "https://ccmixter.org/api/query?f=json&t=search_uploads&limit=12&search_type=any&search=" + encodeURIComponent(q);
+      const api = "https://ccmixter.org/api/query?f=json&t=search_uploads&dataview=links&limit=12&search_type=any&lic=by&search=" + encodeURIComponent(q);
       const res = await fetch(api);
       if (!res.ok) throw new Error("ccMixter indisponible");
       const data = await res.json();
-      const rows = Array.isArray(data) ? data : (data.results || data.uploads || data.data || []);
+      const rows = Array.isArray(data) ? data : (data.results || data.uploads || data.data || Object.values(data).filter(v => v && typeof v === "object"));
       rows.forEach(item => {
         const title = item.upload_name || item.title || item.name || "Titre ccMixter";
         const artist = item.user_real_name || item.user_name || item.artist || item.user || "Artiste ccMixter";
         const page = item.upload_url || item.url || (item.upload_id ? "https://ccmixter.org/files/" + encodeURIComponent(item.user_name || item.user || "") + "/" + item.upload_id : "https://ccmixter.org/");
-        const audio = item.file_url || item.download_url || item.file || "";
+        const audio = item.file_url || item.download_url || item.file || item.url_file || item.mp3 || "";
         const license = item.license || item.license_name || "Creative Commons — consulter la fiche";
         freeResults.append(resultCard(title, artist, "ccMixter", page, license + " · attribution à respecter", /^https?:\\/\\//i.test(audio) ? audio : ""));
       });
@@ -173,7 +185,7 @@
           if (!allowed) return;
           const audioUrl = "https://archive.org/download/" + encodeURIComponent(item.identifier) + "/" + audioFile.name.split("/").map(encodeURIComponent).join("/");
           const page = "https://archive.org/details/" + encodeURIComponent(item.identifier);
-          const label = /publicdomain/i.test(license) || license.includes("/publicdomain/") ? "Domaine public" : "Licence Creative Commons (à vérifier)";
+          const label = /publicdomain/i.test(license) || license.includes("/publicdomain/") || /public domain|cc0/i.test(String(meta.metadata?.rights || "")) ? "Domaine public / CC0" : /by-sa/i.test(license) ? "CC BY-SA · attribution + partage à l'identique" : "CC BY · attribution requise";
           freeResults.append(resultCard(item.title, Array.isArray(item.creator) ? item.creator.join(", ") : item.creator, "Internet Archive", page, label, audioUrl));
         } catch (_) {}
       }));
