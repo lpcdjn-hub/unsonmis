@@ -1189,6 +1189,7 @@ function switchTab(tabName) {
   document.getElementById("tab-tracks").classList.toggle("hidden", tabName !== "tracks");
   document.getElementById("tab-local").classList.toggle("hidden", tabName !== "local");
   document.getElementById("tab-community").classList.toggle("hidden", tabName !== "community");
+  document.getElementById("tab-member").classList.toggle("hidden", tabName !== "member");
 }
 
 document.querySelectorAll(".tab-btn").forEach(btn => {
@@ -1327,7 +1328,7 @@ async function moderateCommunityTrack(id,status){
  const {error}=await communityClient.from("community_tracks").update(values).eq("id",id);
  if(error){communityMessage("Action impossible : "+error.message,true);return;}
  communityMessage(status==="approved"?"Morceau publié !":"Morceau refusé.");
- await loadCommunityTracks();await loadCommunityModeration();
+ await loadCommunityTracks();await loadCommunityModeration();await loadMemberDashboard();
 }
 async function refreshCommunityAuth(){
  const {data}=await communityClient.auth.getSession();communityUser=data.session?.user||null;
