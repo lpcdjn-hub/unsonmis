@@ -201,9 +201,9 @@
       return;
     }
     let embed;
-    if (/(^|\\.)soundcloud\\.com$/i.test(url.hostname)) {
+    if (/(^|\.)soundcloud\.com$/i.test(url.hostname)) {
       embed = "https://w.soundcloud.com/player/?url=" + encodeURIComponent(url.href) + "&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&visual=true";
-    } else if (/(^|\\.)mixcloud\\.com$/i.test(url.hostname)) {
+    } else if (/(^|\.)mixcloud\.com$/i.test(url.hostname)) {
       embed = "https://www.mixcloud.com/widget/iframe/?hide_cover=1&mini=0&feed=" + encodeURIComponent(url.pathname);
     } else {
       status.textContent = "Pour le lecteur intégré, utilise un lien SoundCloud ou Mixcloud.";
