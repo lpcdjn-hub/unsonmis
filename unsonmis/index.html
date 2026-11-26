@@ -1265,6 +1265,8 @@ function playFromQueue(queue, index) {
   if (localTracks.length > 0) renderLocalTracks();
 }
 
+window.playFromQueue = playFromQueue;
+
 playPauseButton.onclick = async () => {
   if (!audio.src) {
     if (radios.length > 0) {
@@ -1706,7 +1708,7 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
 </script>
 
 <script src="./external-platforms.js?v=20261126-archive-ccmixter-player2"></script>
-<script src="./world-radio.js?v=20261126-world"></script>
+<script src="./world-radio.js?v=20261126-main-player"></script>
 <script>
 /* Navigation de secours indépendante du script principal */
 (function () {
