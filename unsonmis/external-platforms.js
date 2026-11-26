@@ -181,7 +181,7 @@
           const audioFile = files.find(f => typeof f.name === "string" && /\.mp3$/i.test(f.name) && !f.name.includes("__ia_thumb"));
           if (!audioFile) return;
           const license = String(item.licenseurl || "");
-          const allowed = /creativecommons\.org\/licenses\/(by|by-sa|by-nc|by-nc-sa|by-nd|by-nc-nd)|creativecommons\.org\/publicdomain|publicdomain/i.test(license);
+          const allowed = /creativecommons\.org\/licenses\/(by|by-sa)\//i.test(license) || /creativecommons\.org\/publicdomain\/(zero|mark)/i.test(license) || /public domain|cc0/i.test(String(meta.metadata?.rights || ""));
           if (!allowed) return;
           const audioUrl = "https://archive.org/download/" + encodeURIComponent(item.identifier) + "/" + audioFile.name.split("/").map(encodeURIComponent).join("/");
           const page = "https://archive.org/details/" + encodeURIComponent(item.identifier);
