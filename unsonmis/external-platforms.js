@@ -123,7 +123,7 @@
     const jobs = [];
 
     jobs.push((async () => {
-      const api = "https://ccmixter.org/api/query?f=json&t=search_uploads&dataview=links&limit=12&search_type=any&lic=by&search=" + encodeURIComponent(q);
+      const api = "https://ccmixter.org/api/query?f=json&t=search_uploads&limit=12&search_type=any&lic=by&search=" + encodeURIComponent(q);
       const res = await fetch(api);
       if (!res.ok) throw new Error("ccMixter indisponible");
       const data = await res.json();
