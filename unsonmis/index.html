@@ -463,6 +463,17 @@
   .community-admin-item{border:1px solid var(--border);border-radius:8px;padding:10px;margin:8px 0}
   .community-divider{border:0;border-top:1px solid var(--border);margin:18px 0}
 
+
+  .member-panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px}
+  .member-panel h2,.member-panel h3{color:var(--yellow);margin-bottom:10px}
+  .member-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+  .member-panel input,.member-panel textarea,.member-panel select{width:100%;background:#111;border:1px solid var(--border);color:var(--text);padding:10px;border-radius:7px;margin:5px 0 10px}
+  .member-panel button{background:var(--red);color:white;border:0;border-radius:7px;padding:10px 13px;font-weight:700;cursor:pointer;margin:3px}
+  .member-panel button.secondary{background:#333}
+  .member-item{padding:10px;border:1px solid var(--border);border-radius:8px;margin:8px 0;display:flex;justify-content:space-between;gap:10px;align-items:center}
+  .member-item small{color:var(--muted)}
+  .member-stat{background:#101010;border:1px solid var(--border);padding:12px;border-radius:8px}
+  .member-stat strong{display:block;font-size:1.4rem;color:var(--yellow)}
   .hidden { display: none !important; }
 </style>
 
@@ -493,6 +504,7 @@
   <button class="tab-btn" data-tab="tracks">🎵 Découvertes Audius</button>
   <button class="tab-btn" data-tab="local">💾 Mes Sons (<span id="localCount">0</span>)</button>
   <button class="tab-btn" data-tab="community">🎤 Communauté</button>
+  <button class="tab-btn" data-tab="member">👤 Espace membre</button>
 </div>
 
 <div class="container">
@@ -601,6 +613,58 @@
         <div id="communityPendingList" class="track-list"></div>
       </div>
     </section>
+
+  <div id="tab-member" class="hidden">
+    <section class="member-panel">
+      <h2>👤 Mon espace membre UNSONMIS</h2>
+      <p class="community-note">Connectez-vous dans l’onglet Communauté pour accéder à votre espace personnel.</p>
+      <div id="memberSignedOut" class="community-note">Vous devez être connecté pour consulter votre profil, vos favoris et vos playlists.</div>
+      <div id="memberDashboard" class="hidden">
+        <div class="member-grid">
+          <div>
+            <h3>Mon profil</h3>
+            <label for="memberDisplayName">Nom affiché</label><input id="memberDisplayName" maxlength="80" placeholder="Votre nom">
+            <label for="memberUsername">Identifiant public</label><input id="memberUsername" maxlength="30" placeholder="Votre pseudo">
+            <label for="memberBio">Présentation</label><textarea id="memberBio" rows="3" maxlength="300" placeholder="Quelques mots sur vous"></textarea>
+            <button id="memberSaveProfile" type="button">Enregistrer mon profil</button>
+          </div>
+          <div>
+            <h3>Ajouter un favori</h3>
+            <input id="memberFavTitle" maxlength="160" placeholder="Titre du morceau">
+            <input id="memberFavArtist" maxlength="120" placeholder="Artiste">
+            <input id="memberFavUrl" type="url" placeholder="Lien audio direct">
+            <input id="memberFavSource" maxlength="40" placeholder="Source (Audius, radio...)">
+            <button id="memberAddFavorite" type="button">Ajouter à mes favoris</button>
+          </div>
+          <div>
+            <h3>Créer une playlist</h3>
+            <input id="memberPlaylistName" maxlength="80" placeholder="Nom de la playlist">
+            <input id="memberPlaylistDescription" maxlength="200" placeholder="Description (facultatif)">
+            <button id="memberCreatePlaylist" type="button">Créer ma playlist</button>
+          </div>
+        </div>
+        <hr class="community-divider">
+        <h3>❤️ Mes favoris</h3><div id="memberFavorites" class="track-list"></div>
+        <hr class="community-divider">
+        <h3>🎶 Mes playlists</h3><div id="memberPlaylists" class="track-list"></div>
+        <hr class="community-divider">
+        <h3>🕘 Mon historique d’écoute</h3><div id="memberHistory" class="track-list"></div>
+      </div>
+      <div id="memberStatus" class="community-status" role="status" aria-live="polite"></div>
+    </section>
+    <section id="memberAdminPanel" class="member-panel hidden">
+      <h2>🛡️ Tableau de bord Super-Admin</h2>
+      <p class="community-note">Administration UNSONMIS — accès réservé au rôle Super-Admin.</p>
+      <div class="member-grid">
+        <div class="member-stat"><strong id="adminPendingCount">—</strong><span>Morceaux en attente</span></div>
+        <div class="member-stat"><strong id="adminApprovedCount">—</strong><span>Morceaux publiés</span></div>
+        <div class="member-stat"><strong id="adminMemberSince">—</strong><span>Compte administrateur</span></div>
+      </div>
+      <p class="community-note">La validation et le refus des propositions se font dans l’onglet Communauté, section Modération Super-Admin.</p>
+      <button id="adminRefreshStats" type="button">Actualiser les indicateurs</button>
+    </section>
+  </div>
+
   </div>
 
 </div>
@@ -1144,6 +1208,70 @@ document.getElementById("closePwaModal").onclick = () => {
   document.getElementById("pwaModal").classList.remove("open");
 };
 
+
+
+/* ESPACE MEMBRE + TABLEAU DE BORD */
+function memberMessage(message,isError=false){
+ const el=document.getElementById("memberStatus");el.textContent=message;el.style.color=isError?"#ff7777":"var(--yellow)";
+}
+async function loadMemberDashboard(){
+ const signedOut=document.getElementById("memberSignedOut"),dash=document.getElementById("memberDashboard"),admin=document.getElementById("memberAdminPanel");
+ signedOut.classList.toggle("hidden",!!communityUser);dash.classList.toggle("hidden",!communityUser);admin.classList.toggle("hidden",!communityIsAdmin);
+ if(!communityUser)return;
+ const uid=communityUser.id;
+ const {data:profile,error:profileErr}=await communityClient.from("profiles").select("username,display_name,bio").eq("id",uid).maybeSingle();
+ if(profileErr)memberMessage("Profil indisponible : "+profileErr.message,true);
+ document.getElementById("memberDisplayName").value=profile?.display_name||"";
+ document.getElementById("memberUsername").value=profile?.username||"";
+ document.getElementById("memberBio").value=profile?.bio||"";
+ const [fav,lists,hist]=await Promise.all([
+  communityClient.from("favorites").select("id,title,artist,audio_url,source,created_at").eq("user_id",uid).order("created_at",{ascending:false}).limit(100),
+  communityClient.from("playlists").select("id,name,description,is_public,created_at").eq("user_id",uid).order("created_at",{ascending:false}).limit(100),
+  communityClient.from("listening_history").select("id,title,artist,source,played_at").eq("user_id",uid).order("played_at",{ascending:false}).limit(30)
+ ]);
+ const favBox=document.getElementById("memberFavorites");favBox.replaceChildren();
+ if(fav.error)memberMessage("Favoris indisponibles : "+fav.error.message,true);
+ else if(!fav.data?.length)favBox.textContent="Aucun favori pour le moment.";
+ else fav.data.forEach(x=>{const row=document.createElement("div");row.className="member-item";const label=document.createElement("span");label.textContent=x.title+" — "+x.artist;const del=document.createElement("button");del.className="secondary";del.textContent="Retirer";del.onclick=async()=>{const {error}=await communityClient.from("favorites").delete().eq("id",x.id);if(error)memberMessage(error.message,true);else loadMemberDashboard();};row.append(label,del);favBox.append(row);});
+ const listBox=document.getElementById("memberPlaylists");listBox.replaceChildren();
+ if(lists.error)memberMessage("Playlists indisponibles : "+lists.error.message,true);
+ else if(!lists.data?.length)listBox.textContent="Aucune playlist créée.";
+ else lists.data.forEach(x=>{const row=document.createElement("div");row.className="member-item";const label=document.createElement("span");label.textContent=x.name+(x.description?" — "+x.description:"");const del=document.createElement("button");del.className="secondary";del.textContent="Supprimer";del.onclick=async()=>{const {error}=await communityClient.from("playlists").delete().eq("id",x.id);if(error)memberMessage(error.message,true);else loadMemberDashboard();};row.append(label,del);listBox.append(row);});
+ const histBox=document.getElementById("memberHistory");histBox.replaceChildren();
+ if(hist.error)memberMessage("Historique indisponible : "+hist.error.message,true);
+ else if(!hist.data?.length)histBox.textContent="Votre historique apparaîtra ici lorsque l’écoute sera enregistrée.";
+ else hist.data.forEach(x=>{const row=document.createElement("div");row.className="member-item";row.textContent=x.title+" — "+x.artist+" · "+new Date(x.played_at).toLocaleString("fr-FR");histBox.append(row);});
+ if(communityIsAdmin)await loadAdminStats();
+}
+async function loadAdminStats(){
+ const [pending,approved]=await Promise.all([
+  communityClient.from("community_tracks").select("id",{count:"exact",head:true}).eq("status","pending"),
+  communityClient.from("community_tracks").select("id",{count:"exact",head:true}).eq("status","approved")
+ ]);
+ document.getElementById("adminPendingCount").textContent=pending.error?"—":String(pending.count??0);
+ document.getElementById("adminApprovedCount").textContent=approved.error?"—":String(approved.count??0);
+ document.getElementById("adminMemberSince").textContent=communityUser?.email||"Connecté";
+}
+document.getElementById("memberSaveProfile").onclick=async()=>{
+ if(!communityUser)return;
+ const values={id:communityUser.id,display_name:document.getElementById("memberDisplayName").value.trim(),username:document.getElementById("memberUsername").value.trim(),bio:document.getElementById("memberBio").value.trim(),updated_at:new Date().toISOString()};
+ const {error}=await communityClient.from("profiles").upsert(values,{onConflict:"id"});
+ memberMessage(error?"Enregistrement impossible : "+error.message:"Profil enregistré.",!!error);
+};
+document.getElementById("memberAddFavorite").onclick=async()=>{
+ if(!communityUser)return;
+ const title=document.getElementById("memberFavTitle").value.trim(),artist=document.getElementById("memberFavArtist").value.trim(),url=document.getElementById("memberFavUrl").value.trim(),source=document.getElementById("memberFavSource").value.trim()||"Manuel";
+ if(!title||!artist||!url){memberMessage("Indiquez au minimum le titre, l’artiste et le lien audio.",true);return;}
+ const {error}=await communityClient.from("favorites").insert({user_id:communityUser.id,track_id:url,title,artist,audio_url:url,source});
+ if(error)memberMessage("Ajout impossible : "+error.message,true);else{memberMessage("Morceau ajouté aux favoris.");document.getElementById("memberFavTitle").value="";document.getElementById("memberFavArtist").value="";document.getElementById("memberFavUrl").value="";loadMemberDashboard();}
+};
+document.getElementById("memberCreatePlaylist").onclick=async()=>{
+ if(!communityUser)return;const name=document.getElementById("memberPlaylistName").value.trim();
+ if(!name){memberMessage("Donnez un nom à votre playlist.",true);return;}
+ const {error}=await communityClient.from("playlists").insert({user_id:communityUser.id,name,description:document.getElementById("memberPlaylistDescription").value.trim(),is_public:false});
+ if(error)memberMessage("Création impossible : "+error.message,true);else{memberMessage("Playlist créée.");document.getElementById("memberPlaylistName").value="";document.getElementById("memberPlaylistDescription").value="";loadMemberDashboard();}
+};
+document.getElementById("adminRefreshStats").onclick=loadAdminStats;
 
 /* UNSONMIS COMMUNITY CATALOGUE */
 const communityClient = window.supabase.createClient(
