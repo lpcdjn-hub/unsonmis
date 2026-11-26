@@ -547,6 +547,13 @@
 
   <!-- TAB 2: MUSIQUE LIBRE (AUDIUS) -->
   <div id="tab-tracks" class="hidden">
+    <section class="community-panel" style="margin-bottom:14px">
+      <h2>🔎 Recherche musicale globale</h2>
+      <p>Un mot suffit : recherche dans les titres et artistes d’Audius, ainsi que dans les paroles indexées par LRCLIB.</p>
+      <div class="search-box"><input type="search" id="globalMusicSearch" placeholder="Un mot, une phrase, un artiste…"><button type="button" id="globalMusicSearchBtn">Tout chercher</button></div>
+      <div class="section-info"><span id="globalMusicStatus">Recherche par titre et dans les paroles disponibles.</span></div>
+      <div class="track-list" id="globalMusicResults"></div>
+    </section>
     <div class="search-box">
       <input type="text" id="searchInput" placeholder="Rechercher un artiste, un style, un morceau libre...">
       <button id="searchBtn">Chercher</button>
@@ -996,6 +1003,54 @@ document.querySelectorAll("#trackGenreChips .chip").forEach(btn => {
   };
 });
 
+
+async function runGlobalMusicSearch(){
+ const query=document.getElementById("globalMusicSearch").value.trim();
+ const status=document.getElementById("globalMusicStatus"),list=document.getElementById("globalMusicResults");
+ if(query.length<2){status.textContent="Saisis au moins 2 caractères.";return;}
+ status.textContent="Recherche dans les catalogues et les paroles disponibles…";list.replaceChildren();
+ const addMessage=message=>{const p=document.createElement("p");p.className="community-note";p.textContent=message;list.appendChild(p);};
+ const tasks=await Promise.allSettled([
+  fetch(audiusHost+"/v1/tracks/search?query="+encodeURIComponent(query)+"&app_name=UNSONMIS").then(r=>{if(!r.ok)throw new Error("Audius");return r.json();}),
+  fetch("https://lrclib.net/api/search?q="+encodeURIComponent(query),{headers:{"X-User-Agent":"UNSONMIS/1.0 (https://lpcdjn-hub.github.io/unsonmis/)"} }).then(r=>{if(!r.ok)throw new Error("LRCLIB");return r.json();})
+ ]);
+ let count=0;
+ if(tasks[0].status==="fulfilled"){
+  (tasks[0].value.data||[]).forEach(t=>{
+   const card=document.createElement("div");card.className="card-item";
+   const art=document.createElement("div");art.className="art-box";art.textContent="🎧";
+   const meta=document.createElement("div");meta.className="item-meta";
+   const title=document.createElement("div");title.className="item-title";title.textContent=t.title||"Titre inconnu";
+   const artist=document.createElement("div");artist.className="item-sub";artist.textContent=(t.user&&t.user.name)||"Artiste indépendant";
+   const source=document.createElement("span");source.className="badge";source.textContent="AUDIUS · TITRE";
+   meta.append(title,artist,source);
+   const play=document.createElement("button");play.type="button";play.className="action-pill primary";play.textContent="▶ Écouter";
+   play.addEventListener("click",()=>playFromQueue([{title:t.title,artist:(t.user&&t.user.name)||"Audius",url:audiusHost+"/v1/tracks/"+t.id+"/stream?app_name=UNSONMIS",isLive:false}],0));
+   card.append(art,meta,play);list.appendChild(card);count++;
+  });
+ }else addMessage("Audius : recherche momentanément indisponible.");
+ if(tasks[1].status==="fulfilled"){
+  (Array.isArray(tasks[1].value)?tasks[1].value:[]).forEach(track=>{
+   const card=document.createElement("div");card.className="card-item";
+   const art=document.createElement("div");art.className="art-box";art.textContent="📝";
+   const meta=document.createElement("div");meta.className="item-meta";
+   const title=document.createElement("div");title.className="item-title";title.textContent=track.trackName||track.name||"Titre inconnu";
+   const artist=document.createElement("div");artist.className="item-sub";artist.textContent=(track.artistName||"Artiste inconnu")+" · paroles / métadonnées indexées";
+   const snippet=document.createElement("div");snippet.className="item-sub";
+   const words=(track.plainLyrics||track.syncedLyrics||"").split(String.fromCharCode(10)).join(" ").replace(/\[[^\]]*\]/g," ").replace(/\s+/g," ").trim();
+   const at=words.toLocaleLowerCase().indexOf(query.toLocaleLowerCase());
+   snippet.textContent=at>=0?"…"+words.slice(Math.max(0,at-55),Math.min(words.length,at+query.length+90))+"…":"Paroles disponibles sur LRCLIB";
+   const link=document.createElement("a");link.href="https://lrclib.net/search/"+encodeURIComponent(track.trackName||track.name||"");link.target="_blank";link.rel="noopener noreferrer";link.textContent="Voir les paroles / détails";link.className="item-sub";
+   const play=document.createElement("button");play.type="button";play.className="action-pill";play.textContent="Chercher l’audio";
+   play.addEventListener("click",()=>{document.getElementById("searchInput").value=(track.trackName||track.name||"")+" "+(track.artistName||"");switchTab("tracks");searchTracks(document.getElementById("searchInput").value);});
+   meta.append(title,artist,snippet,link);card.append(art,meta,play);list.appendChild(card);count++;
+  });
+ }else addMessage("Recherche dans les paroles : service momentanément indisponible.");
+ status.textContent=count+" résultat(s) · Audius + paroles indexées LRCLIB. Tous les morceaux n’ont pas de paroles disponibles.";
+ if(!count)addMessage("Aucun résultat. Essaie un autre mot ou une autre orthographe.");
+}
+document.getElementById("globalMusicSearchBtn").addEventListener("click",runGlobalMusicSearch);
+document.getElementById("globalMusicSearch").addEventListener("keydown",e=>{if(e.key==="Enter")runGlobalMusicSearch();});
 // --- LOCAL FILES ---
 document.getElementById("localFilesInput").onchange = (e) => {
   const files = Array.from(e.target.files);
