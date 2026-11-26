@@ -474,6 +474,11 @@
   .member-item small{color:var(--muted)}
   .member-stat{background:#101010;border:1px solid var(--border);padding:12px;border-radius:8px}
   .member-stat strong{display:block;font-size:1.4rem;color:var(--yellow)}
+  body.focus-mode { padding-bottom: 18px; }
+  body.focus-mode > header, body.focus-mode > .player-bar { display:none !important; }
+  .focus-mode-toggle{display:inline-flex;align-items:center;justify-content:center;gap:7px;margin:0 0 10px 14px;padding:9px 13px;border:1px solid var(--yellow);border-radius:20px;background:#171717;color:var(--yellow);font-weight:750;cursor:pointer;font-size:.82rem}
+  .focus-mode-exit{display:none;position:fixed;top:10px;right:10px;z-index:150;padding:10px 14px;border:1px solid var(--yellow);border-radius:22px;background:rgba(20,20,20,.96);color:var(--yellow);font-weight:800;box-shadow:0 3px 16px rgba(0,0,0,.55);cursor:pointer}
+  body.focus-mode .focus-mode-exit{display:block}
   .hidden { display: none !important; }
 </style>
 
@@ -499,6 +504,8 @@
   </div>
 </header>
 
+<button class="focus-mode-toggle" id="focusModeBtn" type="button" aria-pressed="false">⛶ Agrandir l’espace</button>
+<button class="focus-mode-exit" id="focusModeExit" type="button">✕ Réafficher le haut et le lecteur</button>
 <div class="tabs">
   <button class="tab-btn active" data-tab="radios">📻 Webradios (Tous styles)</button>
   <button class="tab-btn" data-tab="tracks">🎵 Découvertes Audius</button>
@@ -1431,6 +1438,20 @@ refreshCommunityAuth().catch(e=>communityMessage("Connexion au catalogue impossi
 /* FIN COMMUNAUTÉ */
 
 
+// Mode exploration : le son continue pendant que l'en-tête et le lecteur sont masqués.
+(function(){
+ const enter=document.getElementById("focusModeBtn"),exit=document.getElementById("focusModeExit");
+ if(!enter||!exit)return;
+ function toggle(active){
+  document.body.classList.toggle("focus-mode",active);
+  enter.setAttribute("aria-pressed",String(active));
+  enter.textContent=active?"✓ Espace agrandi":"⛶ Agrandir l’espace";
+  (active?exit:enter).focus({preventScroll:true});
+ }
+ enter.addEventListener("click",()=>toggle(true));
+ exit.addEventListener("click",()=>toggle(false));
+ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("focus-mode"))toggle(false);});
+})();
 // --- INIT ---
 renderRadios();
 initAudius().then(() => searchTracks("tekno tribe acid"));
