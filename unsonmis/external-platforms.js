@@ -33,6 +33,16 @@
     </div>
     <div id="platformEmbedStatus" class="community-status" aria-live="polite"></div>
     <div id="platformEmbedFrame"></div>
+
+  <hr class="community-divider">
+  <h3>🎧 Catalogue gratuit : écoute directe</h3>
+  <p>Deux catalogues supplémentaires : aperçus musicaux Apple/iTunes et enregistrements audio de l'Internet Archive. Les licences et conditions restent celles de chaque œuvre.</p>
+  <div class="search-box">
+    <input id="freeCatalogSearch" type="search" placeholder="Rechercher un artiste ou un style…">
+    <button id="freeCatalogBtn" type="button">Rechercher</button>
+  </div>
+  <div id="freeCatalogStatus" class="community-status" aria-live="polite"></div>
+  <div id="freeCatalogResults" class="track-list"></div>
   `;
 
   const audiusList = document.getElementById("trackList");
@@ -59,6 +69,91 @@
   search.addEventListener("keydown", e => {
     if (e.key === "Enter") explore("soundcloud");
   });
+
+
+  const freeSearch = document.getElementById("freeCatalogSearch");
+  const freeStatus = document.getElementById("freeCatalogStatus");
+  const freeResults = document.getElementById("freeCatalogResults");
+
+  function resultCard(title, artist, source, url, license, preview) {
+    const card = document.createElement("article");
+    card.className = "community-admin-item";
+    const heading = document.createElement("strong");
+    heading.textContent = title || "Titre sans nom";
+    const byline = document.createElement("p");
+    byline.textContent = (artist || "Artiste non renseigné") + " · " + source + (license ? " · " + license : "");
+    card.append(heading, byline);
+    if (preview) {
+      const audio = document.createElement("audio");
+      audio.controls = true;
+      audio.preload = "none";
+      audio.src = preview;
+      audio.style.width = "100%";
+      card.append(audio);
+    }
+    const link = document.createElement("a");
+    link.href = url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = "Voir la source et ses conditions";
+    link.style.color = "var(--yellow)";
+    card.append(link);
+    return card;
+  }
+
+  async function searchFreeCatalogues() {
+    const q = freeSearch.value.trim();
+    if (!q) { freeStatus.textContent = "Entre un artiste ou un style musical."; return; }
+    freeResults.replaceChildren();
+    freeStatus.textContent = "Recherche dans les catalogues gratuits…";
+    const jobs = [];
+
+    jobs.push((async () => {
+      const api = "https://itunes.apple.com/search?entity=song&limit=12&term=" + encodeURIComponent(q);
+      const res = await fetch(api);
+      if (!res.ok) throw new Error("Apple/iTunes indisponible");
+      const data = await res.json();
+      (data.results || []).forEach(t => {
+        if (!t.previewUrl) return;
+        freeResults.append(resultCard(t.trackName, t.artistName, "Apple/iTunes · aperçu", t.trackViewUrl || "https://music.apple.com/", "Aperçu court", t.previewUrl));
+      });
+    })());
+
+    jobs.push((async () => {
+      const query = 'mediatype:audio AND licenseurl:* AND "' + q.replace(/[+-!(){}\[\]^"~*?:\\/]/g, " ") + '"';
+      const api = "https://archive.org/advancedsearch.php?q=" + encodeURIComponent(query) + "&fl[]=identifier&fl[]=title&fl[]=creator&fl[]=licenseurl&rows=10&page=1&output=json";
+      const res = await fetch(api);
+      if (!res.ok) throw new Error("Internet Archive indisponible");
+      const data = await res.json();
+      const docs = data.response?.docs || [];
+      await Promise.all(docs.slice(0, 8).map(async item => {
+        try {
+          const metaRes = await fetch("https://archive.org/metadata/" + encodeURIComponent(item.identifier));
+          if (!metaRes.ok) return;
+          const meta = await metaRes.json();
+          const files = meta.files || [];
+          const audioFile = files.find(f => typeof f.name === "string" && /\.mp3$/i.test(f.name) && !f.name.includes("__ia_thumb"));
+          if (!audioFile) return;
+          const license = String(item.licenseurl || "");
+          const allowed = /creativecommons\.org\/licenses\/(by|by-sa|by-nc|by-nc-sa|by-nd|by-nc-nd)|creativecommons\.org\/publicdomain|publicdomain/i.test(license);
+          if (!allowed) return;
+          const audioUrl = "https://archive.org/download/" + encodeURIComponent(item.identifier) + "/" + audioFile.name.split("/").map(encodeURIComponent).join("/");
+          const page = "https://archive.org/details/" + encodeURIComponent(item.identifier);
+          const label = /publicdomain/i.test(license) || license.includes("/publicdomain/") ? "Domaine public" : "Licence Creative Commons (à vérifier)";
+          freeResults.append(resultCard(item.title, Array.isArray(item.creator) ? item.creator.join(", ") : item.creator, "Internet Archive", page, label, audioUrl));
+        } catch (_) {}
+      }));
+    })());
+
+    const settled = await Promise.allSettled(jobs);
+    const errors = settled.filter(x => x.status === "rejected").length;
+    const count = freeResults.children.length;
+    freeStatus.textContent = count + " résultat(s) affiché(s)." + (errors ? " Certains catalogues n'ont pas répondu." : "") + " Les aperçus Apple sont limités ; les fichiers Archive dépendent de leur licence et disponibilité.";
+    if (!count) freeStatus.textContent += " Aucun fichier compatible trouvé pour cette recherche.";
+  }
+
+  document.getElementById("freeCatalogBtn").addEventListener("click", searchFreeCatalogues);
+  freeSearch.addEventListener("keydown", e => { if (e.key === "Enter") searchFreeCatalogues(); });
 
   document.getElementById("platformEmbedBtn").addEventListener("click", () => {
     const raw = document.getElementById("platformEmbedUrl").value.trim();
