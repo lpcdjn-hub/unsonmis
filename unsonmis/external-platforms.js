@@ -36,7 +36,7 @@
 
   <hr class="community-divider">
   <h3>🎧 Catalogue gratuit : écoute directe</h3>
-  <p>Deux catalogues supplémentaires : aperçus musicaux Apple/iTunes et enregistrements audio de l'Internet Archive. Les licences et conditions restent celles de chaque œuvre.</p>
+  <p>Trois catalogues supplémentaires : aperçus Apple/iTunes, Internet Archive et fichiers audio libres de Wikimedia Commons. Les licences et conditions restent celles de chaque œuvre.</p>
   <div class="search-box">
     <input id="freeCatalogSearch" type="search" placeholder="Rechercher un artiste ou un style…">
     <button id="freeCatalogBtn" type="button">Rechercher</button>
@@ -119,6 +119,23 @@
       });
     })());
 
+    jobs.push((async () => {
+      const api = "https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=" + encodeURIComponent("filemime:audio " + q) + "&gsrnamespace=6&gsrlimit=10&prop=imageinfo&iiprop=url|extmetadata&format=json&origin=*";
+      const res = await fetch(api);
+      if (!res.ok) throw new Error("Wikimedia Commons indisponible");
+      const data = await res.json();
+      Object.values(data.query?.pages || {}).forEach(page => {
+        const info = page.imageinfo?.[0];
+        const meta = info?.extmetadata || {};
+        const license = meta.LicenseShortName?.value || "";
+        const licenseUrl = meta.LicenseUrl?.value || "";
+        if (!info?.url || !/^(CC0|Public domain|CC BY|CC BY-SA|CC BY-NC|CC BY-NC-SA|CC BY-ND|CC BY-NC-ND)/i.test(license)) return;
+        const artist = (meta.Artist?.value || meta.Credit?.value || "Auteur non renseigné").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+        const title = page.title.replace(/^File:/, "");
+        const pageUrl = "https://commons.wikimedia.org/wiki/" + encodeURIComponent(page.title.replace(/ /g, "_"));
+        freeResults.append(resultCard(title, artist, "Wikimedia Commons", pageUrl, license + (licenseUrl ? " · " + licenseUrl : ""), info.url));
+      });
+    })());
     jobs.push((async () => {
       const query = 'mediatype:audio AND licenseurl:* AND "' + q.replace(/[+-!(){}\[\]^"~*?:\\/]/g, " ") + '"';
       const api = "https://archive.org/advancedsearch.php?q=" + encodeURIComponent(query) + "&fl[]=identifier&fl[]=title&fl[]=creator&fl[]=licenseurl&rows=10&page=1&output=json";
