@@ -481,6 +481,35 @@
   .focus-mode-toggle{display:flex;align-items:center;justify-content:center;gap:7px;width:calc(100% - 28px);margin:10px 14px;padding:11px 13px;border:1px solid var(--yellow);border-radius:20px;background:#171717;color:var(--yellow);font-weight:800;cursor:pointer;font-size:.86rem}
   .focus-mode-exit{display:none;position:fixed;top:10px;right:10px;z-index:150;padding:10px 14px;border:1px solid var(--yellow);border-radius:22px;background:rgba(20,20,20,.96);color:var(--yellow);font-weight:800;box-shadow:0 3px 16px rgba(0,0,0,.55);cursor:pointer}
   body.focus-mode .focus-mode-exit{display:block}
+  /* Responsive mobile fixes: prevent radio cards and controls from overflowing */
+  .container, .track-list, .card-item, .community-panel, .member-panel,
+  #worldRadioPanel, #wrResults { min-width: 0; max-width: 100%; }
+  .search-box { min-width: 0; }
+  .search-box input { min-width: 0; width: 100%; }
+  .section-info { gap: 8px; flex-wrap: wrap; }
+  .world-radio-panel { display: block; width: 100%; overflow: hidden; padding: 14px; margin: 16px 0; background: #171717; border: 1px solid #383838; border-radius: 12px; }
+  .wr-title { margin: 0 0 8px; color: #fff; font-size: 1.15rem; }
+  .wr-intro { color: #bbb; font-size: .9rem; line-height: 1.45; margin: 0 0 12px; }
+  .wr-search-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; width: 100%; min-width: 0; }
+  .wr-search-grid input { width: 100%; min-width: 0; max-width: 100%; padding: 11px 12px; border: 1px solid var(--border); border-radius: 8px; background: #101010; color: var(--text); font: inherit; }
+  .wr-search-grid button { width: 100%; min-width: 0; white-space: normal; }
+  .wr-status { color: #ddd; margin: 10px 0; line-height: 1.45; overflow-wrap: anywhere; }
+  .wr-results { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; width: 100%; min-width: 0; }
+  .wr-result { display: flex; align-items: center; gap: 10px; width: 100%; min-width: 0; max-width: 100%; padding: 10px; border: 1px solid #383838; border-radius: 9px; background: #202020; }
+  .wr-result-meta { flex: 1 1 0; min-width: 0; overflow-wrap: anywhere; }
+  .wr-result-meta strong { display: block; color: #fff; line-height: 1.35; overflow-wrap: anywhere; }
+  .wr-result-meta small { display: block; margin-top: 3px; color: #aaa; line-height: 1.4; overflow-wrap: anywhere; }
+  .wr-play { flex: 0 0 auto; max-width: 100%; padding: 9px 11px; border: 0; border-radius: 7px; background: var(--red); color: #fff; font-weight: 700; white-space: nowrap; }
+  .wr-player { display: block; width: 100%; max-width: 100%; margin-top: 12px; }
+  .focus-mode-exit { top: auto; right: 12px; bottom: calc(14px + env(safe-area-inset-bottom)); left: auto; max-width: calc(100vw - 24px); white-space: normal; text-align: center; }
+  @media (min-width: 560px) {
+    .wr-search-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .wr-search-grid button { grid-column: 1 / -1; }
+  }
+  @media (max-width: 380px) {
+    .wr-result { gap: 7px; padding: 8px; }
+    .wr-play { padding: 8px 9px; font-size: .82rem; }
+  }
   .hidden { display: none !important; }
 </style>
 
