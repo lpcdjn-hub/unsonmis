@@ -1344,30 +1344,17 @@ let audioCtx, analyser, sourceNode, dataArray;
 let vizStarted = false;
 
 function startVisualizer() {
+  // Les flux radio externes n'autorisent généralement pas l'accès Web Audio (CORS).
+  // createMediaElementSource() peut alors rendre le son silencieux.
+  // On conserve donc le son natif de l'élément audio et une animation visuelle autonome.
   const canvas = document.getElementById("visualizer");
   const ctx = canvas.getContext("2d");
-
+  analyser = null;
   if (!vizStarted) {
-    try {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      audioCtx = new AudioContext();
-      analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 64;
-      sourceNode = audioCtx.createMediaElementSource(audio);
-      sourceNode.connect(analyser);
-      analyser.connect(audioCtx.destination);
-      dataArray = new Uint8Array(analyser.frequencyBinCount);
-    } catch (e) {
-      analyser = null;
-    }
     vizStarted = true;
     drawViz(ctx, canvas);
   }
-  if (audioCtx && audioCtx.state === "suspended") {
-    audioCtx.resume();
-  }
 }
-
 function drawViz(ctx, canvas) {
   requestAnimationFrame(() => drawViz(ctx, canvas));
   ctx.clearRect(0, 0, canvas.width, canvas.height);
