@@ -109,6 +109,21 @@
     const jobs = [];
 
     jobs.push((async () => {
+      const api = "https://ccmixter.org/api/query?f=json&t=search_uploads&limit=12&search_type=any&search=" + encodeURIComponent(q);
+      const res = await fetch(api);
+      if (!res.ok) throw new Error("ccMixter indisponible");
+      const data = await res.json();
+      const rows = Array.isArray(data) ? data : (data.results || data.uploads || data.data || []);
+      rows.forEach(item => {
+        const title = item.upload_name || item.title || item.name || "Titre ccMixter";
+        const artist = item.user_real_name || item.user_name || item.artist || item.user || "Artiste ccMixter";
+        const page = item.upload_url || item.url || (item.upload_id ? "https://ccmixter.org/files/" + encodeURIComponent(item.user_name || item.user || "") + "/" + item.upload_id : "https://ccmixter.org/");
+        const audio = item.file_url || item.download_url || item.file || "";
+        const license = item.license || item.license_name || "Creative Commons — consulter la fiche";
+        freeResults.append(resultCard(title, artist, "ccMixter", page, license + " · attribution à respecter", /^https?:\\/\\//i.test(audio) ? audio : ""));
+      });
+    })());
+    jobs.push((async () => {
       const api = "https://itunes.apple.com/search?entity=song&limit=12&term=" + encodeURIComponent(q);
       const res = await fetch(api);
       if (!res.ok) throw new Error("Apple/iTunes indisponible");
