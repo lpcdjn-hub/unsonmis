@@ -625,6 +625,7 @@
   <div id="tab-member" class="hidden" style="width:100%;min-height:220px;display:none">
     <section class="member-panel" style="display:block;visibility:visible;min-height:180px">
       <h2>👤 Mon espace membre UNSONMIS</h2>
+      <button class="focus-mode-toggle" id="memberFocusModeBtn" type="button" aria-pressed="false">⛶ Agrandir l’espace membre</button>
       <p class="community-note">Connectez-vous dans l’onglet Communauté pour accéder à votre espace personnel.</p>
       <div id="memberSignedOut" class="community-note">Vous devez être connecté pour consulter votre profil, vos favoris et vos playlists.</div>
       <div id="memberDashboard" class="hidden">
@@ -1438,17 +1439,20 @@ refreshCommunityAuth().catch(e=>communityMessage("Connexion au catalogue impossi
 /* FIN COMMUNAUTÉ */
 
 
-// Mode exploration : le son continue pendant que l'en-tête et le lecteur sont masqués.
+// Mode exploration disponible depuis l'accueil et l'espace membre.
 (function(){
- const enter=document.getElementById("focusModeBtn"),exit=document.getElementById("focusModeExit");
- if(!enter||!exit)return;
+ const enters=[document.getElementById("focusModeBtn"),document.getElementById("memberFocusModeBtn")].filter(Boolean);
+ const exit=document.getElementById("focusModeExit");
+ if(!enters.length||!exit)return;
  function toggle(active){
   document.body.classList.toggle("focus-mode",active);
-  enter.setAttribute("aria-pressed",String(active));
-  enter.textContent=active?"✓ Espace agrandi":"⛶ Agrandir l’espace";
-  (active?exit:enter).focus({preventScroll:true});
+  enters.forEach(button=>{
+   button.setAttribute("aria-pressed",String(active));
+   button.textContent=active?"✓ Espace agrandi":(button.id==="memberFocusModeBtn"?"⛶ Agrandir l’espace membre":"⛶ Agrandir l’espace");
+  });
+  (active?exit:enters.find(button=>button.offsetParent!==null)||enters[0]).focus({preventScroll:true});
  }
- enter.addEventListener("click",()=>toggle(true));
+ enters.forEach(button=>button.addEventListener("click",()=>toggle(true)));
  exit.addEventListener("click",()=>toggle(false));
  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("focus-mode"))toggle(false);});
 })();
