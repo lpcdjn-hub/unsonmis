@@ -1340,7 +1340,7 @@ async function refreshCommunityAuth(){
   const {data:roles}=await communityClient.from("user_roles").select("role").eq("user_id",communityUser.id);
   communityIsAdmin=!!roles?.some(r=>r.role==="super_admin");
  }else communityIsAdmin=false;
- await loadCommunityTracks();await loadCommunityModeration();
+ await loadCommunityTracks();await loadCommunityModeration();await loadMemberDashboard();
 }
 document.getElementById("communitySignupBtn").onclick=async()=>{
  const email=document.getElementById("communityEmail").value.trim(),password=document.getElementById("communityPassword").value;
