@@ -510,6 +510,49 @@
     .wr-result { gap: 7px; padding: 8px; }
     .wr-play { padding: 8px 9px; font-size: .82rem; }
   }
+  /* Fix ciblé des fiches de webradios principales sur mobile */
+  #tab-radios, #radioList { width: 100%; min-width: 0; max-width: 100%; }
+  #radioList { display: flex; flex-direction: column; }
+  #radioList > .card-item {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    align-items: flex-start;
+  }
+  #radioList > .card-item .art-box { flex: 0 0 42px; width: 42px; height: 42px; }
+  #radioList > .card-item .item-meta { flex: 1 1 0; min-width: 0; max-width: 100%; }
+  #radioList > .card-item .item-title {
+    max-width: 100%;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
+    line-height: 1.3;
+  }
+  #radioList > .card-item .item-sub {
+    max-width: 100%;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    line-height: 1.4;
+  }
+  #radioList > .card-item .badge {
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 88px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+    font-size: .62rem;
+    padding: 3px 5px;
+  }
+  @media (max-width: 560px) {
+    #radioList > .card-item { gap: 8px; padding: 10px; }
+  }
   .hidden { display: none !important; }
 </style>
 
