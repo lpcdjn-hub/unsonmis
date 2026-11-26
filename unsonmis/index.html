@@ -660,9 +660,16 @@
         <div class="member-stat"><strong id="adminPendingCount">—</strong><span>Morceaux en attente</span></div>
         <div class="member-stat"><strong id="adminApprovedCount">—</strong><span>Morceaux publiés</span></div>
         <div class="member-stat"><strong id="adminMemberSince">—</strong><span>Compte administrateur</span></div>
+        <div class="member-stat"><strong id="adminMembersCount">—</strong><span>Membres inscrits</span></div>
+        <div class="member-stat"><strong id="adminPlaylistsCount">—</strong><span>Playlists créées</span></div>
+        <div class="member-stat"><strong id="adminFavoritesCount">—</strong><span>Favoris enregistrés</span></div>
       </div>
+      <h3>👥 Gestion des membres</h3>
+      <input id="adminMemberSearch" type="search" placeholder="Rechercher un membre ou un pseudo" aria-label="Rechercher un membre">
+      <div id="adminMembersList" class="track-list"><p class="community-note">Chargement des membres…</p></div>
+      <p class="community-note">Les comptes et les données personnelles ne sont pas modifiables depuis cette liste. Les droits Super-Admin restent protégés.</p>
       <p class="community-note">La validation et le refus des propositions se font dans l’onglet Communauté, section Modération Super-Admin.</p>
-      <button id="adminRefreshStats" type="button">Actualiser les indicateurs</button>
+      <button id="adminRefreshStats" type="button">Actualiser les indicateurs et les membres</button>
     </section>
   </div>
 
@@ -1248,14 +1255,34 @@ async function loadMemberDashboard(){
  else hist.data.forEach(x=>{const row=document.createElement("div");row.className="member-item";row.textContent=x.title+" — "+x.artist+" · "+new Date(x.played_at).toLocaleString("fr-FR");histBox.append(row);});
  if(communityIsAdmin)await loadAdminStats();
 }
+let adminMembersCache=[];
 async function loadAdminStats(){
- const [pending,approved]=await Promise.all([
-  communityClient.from("community_tracks").select("id",{count:"exact",head:true}).eq("status","pending"),
-  communityClient.from("community_tracks").select("id",{count:"exact",head:true}).eq("status","approved")
- ]);
- document.getElementById("adminPendingCount").textContent=pending.error?"—":String(pending.count??0);
- document.getElementById("adminApprovedCount").textContent=approved.error?"—":String(approved.count??0);
- document.getElementById("adminMemberSince").textContent=communityUser?.email||"Connecté";
+ const {data,error}=await communityClient.rpc("admin_dashboard_data");
+ if(error){memberMessage("Tableau Super-Admin indisponible : "+error.message,true);return;}
+ const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=String(value??0);};
+ set("adminPendingCount",data.pending_tracks);
+ set("adminApprovedCount",data.approved_tracks);
+ set("adminMemberSince",communityUser?.email||"Connecté");
+ set("adminMembersCount",data.member_count);
+ set("adminPlaylistsCount",data.playlist_count);
+ set("adminFavoritesCount",data.favorite_count);
+ adminMembersCache=Array.isArray(data.members)?data.members:[];
+ renderAdminMembers();
+}
+function renderAdminMembers(){
+ const box=document.getElementById("adminMembersList");
+ if(!box)return;
+ const q=(document.getElementById("adminMemberSearch")?.value||"").trim().toLocaleLowerCase("fr");
+ const rows=adminMembersCache.filter(m=>[m.display_name,m.username,m.role].some(v=>String(v||"").toLocaleLowerCase("fr").includes(q)));
+ box.replaceChildren();
+ if(!rows.length){const empty=document.createElement("p");empty.className="community-note";empty.textContent="Aucun membre correspondant.";box.append(empty);return;}
+ rows.forEach(m=>{
+  const row=document.createElement("div");row.className="member-item";
+  const info=document.createElement("div");
+  const name=document.createElement("strong");name.textContent=m.display_name||m.username||"Membre sans nom";
+  const detail=document.createElement("small");detail.textContent="@"+(m.username||"sans-pseudo")+" · "+(m.role||"member")+" · Inscrit le "+(m.created_at?new Date(m.created_at).toLocaleDateString("fr-FR"):"date inconnue");
+  info.append(name,document.createElement("br"),detail);row.append(info);box.append(row);
+ });
 }
 document.getElementById("memberSaveProfile").onclick=async()=>{
  if(!communityUser)return;
@@ -1277,6 +1304,7 @@ document.getElementById("memberCreatePlaylist").onclick=async()=>{
  if(error)memberMessage("Création impossible : "+error.message,true);else{memberMessage("Playlist créée.");document.getElementById("memberPlaylistName").value="";document.getElementById("memberPlaylistDescription").value="";loadMemberDashboard();}
 };
 document.getElementById("adminRefreshStats").onclick=loadAdminStats;
+document.getElementById("adminMemberSearch").addEventListener("input",renderAdminMembers);
 
 /* UNSONMIS COMMUNITY CATALOGUE */
 const communityClient = window.supabase.createClient(
