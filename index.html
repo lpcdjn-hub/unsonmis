@@ -967,23 +967,37 @@ function renderLocalTracks() {
 
 // --- PLAYER CORE ---
 const playPauseButton = document.getElementById("playPauseBtn");
+let confirmedPlaying = false;
+let playAttemptTimer = null;
 
 function syncPlaybackButton() {
-  const playing = !audio.paused && !audio.ended;
-  playPauseButton.textContent = playing ? "⏸" : "▶";
-  playPauseButton.setAttribute("aria-label", playing ? "Mettre en pause" : "Reprendre la lecture");
-  playPauseButton.title = playing ? "Pause" : "Lecture";
+  playPauseButton.textContent = confirmedPlaying ? "⏸" : "▶";
+  playPauseButton.setAttribute("aria-label", confirmedPlaying ? "Mettre en pause" : "Reprendre la lecture");
+  playPauseButton.title = confirmedPlaying ? "Pause" : "Lecture";
+}
+
+function markPlaybackStopped() {
+  confirmedPlaying = false;
+  syncPlaybackButton();
 }
 
 audio.addEventListener("playing", () => {
+  confirmedPlaying = true;
+  if (playAttemptTimer) clearTimeout(playAttemptTimer);
   syncPlaybackButton();
   startVisualizer();
 });
-audio.addEventListener("pause", syncPlaybackButton);
-audio.addEventListener("ended", syncPlaybackButton);
-audio.addEventListener("emptied", syncPlaybackButton);
+audio.addEventListener("pause", markPlaybackStopped);
+audio.addEventListener("ended", markPlaybackStopped);
+audio.addEventListener("emptied", markPlaybackStopped);
+audio.addEventListener("waiting", markPlaybackStopped);
+audio.addEventListener("stalled", () => {
+  markPlaybackStopped();
+  document.getElementById("npArtist").textContent = "Mise en mémoire tampon…";
+});
 audio.addEventListener("error", () => {
-  syncPlaybackButton();
+  markPlaybackStopped();
+  if (playAttemptTimer) clearTimeout(playAttemptTimer);
   const messages = {
     1: "Lecture interrompue",
     2: "Erreur réseau : flux inaccessible",
@@ -996,15 +1010,25 @@ audio.addEventListener("error", () => {
 });
 
 async function requestAudioPlay() {
+  confirmedPlaying = false;
+  syncPlaybackButton();
+  if (playAttemptTimer) clearTimeout(playAttemptTimer);
   try {
     await audio.play();
-    syncPlaybackButton();
+    playAttemptTimer = setTimeout(() => {
+      if (!confirmedPlaying) {
+        audio.pause();
+        markPlaybackStopped();
+        document.getElementById("npArtist").textContent =
+          "Aucun son reçu. Essaie une autre radio.";
+      }
+    }, 15000);
     return true;
   } catch (error) {
-    syncPlaybackButton();
+    markPlaybackStopped();
     document.getElementById("npArtist").textContent =
       error && error.name === "NotAllowedError"
-        ? "Appuyez sur Lecture pour autoriser le son"
+        ? "Appuie sur Lecture pour autoriser le son"
         : "Flux indisponible ou bloqué par le navigateur";
     return false;
   }
@@ -1024,10 +1048,11 @@ function playFromQueue(queue, index) {
   document.getElementById("seekBar").value = 0;
   document.getElementById("seekBar").disabled = isLiveStream;
 
+  if (playAttemptTimer) clearTimeout(playAttemptTimer);
   audio.pause();
   audio.src = item.url;
   audio.load();
-  syncPlaybackButton();
+  markPlaybackStopped();
   requestAudioPlay();
 
   renderRadios();
@@ -1042,10 +1067,10 @@ playPauseButton.onclick = async () => {
     }
     return;
   }
-  if (audio.paused || audio.ended) {
-    await requestAudioPlay();
-  } else {
+  if (confirmedPlaying) {
     audio.pause();
+  } else {
+    await requestAudioPlay();
   }
 };
 
