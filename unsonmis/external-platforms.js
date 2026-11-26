@@ -130,7 +130,7 @@
       const rows = Array.isArray(data) ? data : (data.results || data.uploads || data.data || Object.values(data).filter(v => v && typeof v === "object"));
       const findAudio = value => {
         if (!value) return "";
-        if (typeof value === "string") return /^https?:\\/\\//i.test(value) && /\\.(mp3|ogg|wav|flac|m4a)(\\?|$)/i.test(value) ? value : "";
+        if (typeof value === "string") return /^https?:\/\//i.test(value) && /\.(mp3|ogg|wav|flac|m4a)(\?|$)/i.test(value) ? value : "";
         if (Array.isArray(value)) {
           for (const child of value) { const found = findAudio(child); if (found) return found; }
         } else if (typeof value === "object") {
