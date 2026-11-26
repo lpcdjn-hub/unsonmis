@@ -195,7 +195,7 @@
           if (!metaRes.ok) return;
           const meta = await metaRes.json();
           const files = meta.files || [];
-          const audioFile = files.find(f => typeof f.name === "string" && /\.mp3$/i.test(f.name) && !f.name.includes("__ia_thumb"));
+          const audioFile = files.find(f => typeof f.name === "string" && /\.(mp3|ogg|oga|opus|m4a)$/i.test(f.name) && !f.name.includes("__ia_thumb")) || files.find(f => typeof f.name === "string" && /\.flac$/i.test(f.name) && !f.name.includes("__ia_thumb"));
           if (!audioFile) return;
           const license = String(item.licenseurl || "");
           const allowed = /creativecommons\.org\/licenses\/(by|by-sa)\//i.test(license) || /creativecommons\.org\/publicdomain\/(zero|mark)/i.test(license) || /public domain|cc0/i.test(String(meta.metadata?.rights || ""));
