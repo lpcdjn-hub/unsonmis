@@ -183,7 +183,7 @@
       });
     })());
     jobs.push((async () => {
-      const query = 'mediatype:audio AND licenseurl:* AND "' + q.replace(/[+-!(){}\[\]^"~*?:\\/]/g, " ") + '"';
+      const query = 'mediatype:audio AND licenseurl:* AND "' + q.replace(/["\\]/g, " ") + '"';
       const api = "https://archive.org/advancedsearch.php?q=" + encodeURIComponent(query) + "&fl[]=identifier&fl[]=title&fl[]=creator&fl[]=licenseurl&rows=10&page=1&output=json";
       const res = await fetch(api);
       if (!res.ok) throw new Error("Internet Archive indisponible");
