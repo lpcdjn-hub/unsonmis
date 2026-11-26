@@ -798,7 +798,7 @@
     <div class="progress-row">
       <span id="currentTime">0:00</span>
       <input type="range" id="seekBar" min="0" max="100" value="0">
-      <span id="durationTime">LIVE</span>
+      <span id="durationTime">—</span>
     </div>
   </div>
 </div>
@@ -1269,10 +1269,8 @@ window.playFromQueue = playFromQueue;
 
 playPauseButton.onclick = async () => {
   if (!audio.src) {
-    if (radios.length > 0) {
-      const q = radios.map(r => ({ title: r.name, artist: r.desc, url: r.url, isLive: true }));
-      playFromQueue(q, 0);
-    }
+    document.getElementById("npTitle").textContent = "Aucune radio sélectionnée";
+    document.getElementById("npArtist").textContent = "Choisis une radio ou un morceau pour commencer";
     return;
   }
   if (confirmedPlaying) {
