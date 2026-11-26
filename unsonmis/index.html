@@ -1421,5 +1421,28 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
 
 <script src="./external-platforms.js?v=20261126-fma"></script>
 <script src="./world-radio.js?v=20261126-world"></script>
+<script>
+/* Navigation de secours indépendante du script principal */
+(function () {
+  const button = document.getElementById("memberTabButton");
+  if (!button) return;
+  button.addEventListener("click", function () {
+    ["radios", "tracks", "local", "community", "member"].forEach(function (name) {
+      const panel = document.getElementById("tab-" + name);
+      if (panel) panel.classList.toggle("hidden", name !== "member");
+    });
+    document.querySelectorAll(".tab-btn").forEach(function (tab) {
+      tab.classList.toggle("active", tab.dataset.tab === "member");
+    });
+    if (typeof window.loadMemberDashboard === "function") {
+      window.loadMemberDashboard().catch(function (error) {
+        const status = document.getElementById("memberStatus");
+        if (status) status.textContent = "Erreur espace membre : " + (error && error.message ? error.message : error);
+      });
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
