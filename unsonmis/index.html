@@ -504,7 +504,7 @@
   <button class="tab-btn" data-tab="tracks">🎵 Découvertes Audius</button>
   <button class="tab-btn" data-tab="local">💾 Mes Sons (<span id="localCount">0</span>)</button>
   <button class="tab-btn" data-tab="community">🎤 Communauté</button>
-  <button class="tab-btn" data-tab="member">👤 Espace membre</button>
+  <button class="tab-btn" id="memberTabButton" type="button" data-tab="member" onclick="switchTab('member')">👤 Espace membre</button>
 </div>
 
 <div class="container">
@@ -1185,11 +1185,16 @@ function switchTab(tabName) {
   document.querySelectorAll(".tab-btn").forEach(b => {
     b.classList.toggle("active", b.dataset.tab === tabName);
   });
-  document.getElementById("tab-radios").classList.toggle("hidden", tabName !== "radios");
-  document.getElementById("tab-tracks").classList.toggle("hidden", tabName !== "tracks");
-  document.getElementById("tab-local").classList.toggle("hidden", tabName !== "local");
-  document.getElementById("tab-community").classList.toggle("hidden", tabName !== "community");
-  document.getElementById("tab-member").classList.toggle("hidden", tabName !== "member");
+  ["radios","tracks","local","community","member"].forEach(name => {
+    const panel = document.getElementById("tab-" + name);
+    if (panel) panel.classList.toggle("hidden", name !== tabName);
+  });
+  if (tabName === "member" && typeof loadMemberDashboard === "function") {
+    loadMemberDashboard().catch(error => {
+      const status = document.getElementById("memberStatus");
+      if (status) status.textContent = "Erreur espace membre : " + (error?.message || error);
+    });
+  }
 }
 
 document.querySelectorAll(".tab-btn").forEach(btn => {
