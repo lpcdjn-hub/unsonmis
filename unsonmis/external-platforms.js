@@ -128,14 +128,31 @@
       if (!res.ok) throw new Error("ccMixter indisponible");
       const data = await res.json();
       const rows = Array.isArray(data) ? data : (data.results || data.uploads || data.data || Object.values(data).filter(v => v && typeof v === "object"));
-      rows.forEach(item => {
-        const title = item.upload_name || item.title || item.name || "Titre ccMixter";
+      const findAudio = value => {
+        if (!value) return "";
+        if (typeof value === "string") return /^https?:\\/\\//i.test(value) && /\\.(mp3|ogg|wav|flac|m4a)(\\?|$)/i.test(value) ? value : "";
+        if (Array.isArray(value)) {
+          for (const child of value) { const found = findAudio(child); if (found) return found; }
+        } else if (typeof value === "object") {
+          for (const child of Object.values(value)) { const found = findAudio(child); if (found) return found; }
+        }
+        return "";
+      };
+      await Promise.all(rows.slice(0, 12).map(async item => {
+        const id = item.upload_id || item.id;
         const artist = item.user_real_name || item.user_name || item.artist || item.user || "Artiste ccMixter";
-        const page = item.upload_url || item.url || (item.upload_id ? "https://ccmixter.org/files/" + encodeURIComponent(item.user_name || item.user || "") + "/" + item.upload_id : "https://ccmixter.org/");
-        const audio = item.file_url || item.download_url || item.file || item.url_file || item.mp3 || "";
-        const license = item.license || item.license_name || "Creative Commons — consulter la fiche";
-        freeResults.append(resultCard(title, artist, "ccMixter", page, license + " · attribution à respecter", /^https?:\\/\\//i.test(audio) ? audio : ""));
-      });
+        const title = item.upload_name || item.title || item.name || "Titre ccMixter";
+        const page = item.upload_url || (id ? "https://ccmixter.org/files/" + encodeURIComponent(item.user_name || item.user || "") + "/" + encodeURIComponent(id) : "https://ccmixter.org/");
+        let audio = findAudio(item);
+        if (!audio && id) {
+          try {
+            const fileRes = await fetch("https://ccmixter.org/api/query?f=json&dataview=files&ids=" + encodeURIComponent(id));
+            if (fileRes.ok) audio = findAudio(await fileRes.json());
+          } catch (_) {}
+        }
+        const license = item.license || item.license_name || "Creative Commons BY · consulter la fiche";
+        freeResults.append(resultCard(title, artist, "ccMixter", page, license + " · attribution requise", audio));
+      }));
     })());
     jobs.push((async () => {
       const api = "https://itunes.apple.com/search?entity=song&limit=12&term=" + encodeURIComponent(q);
