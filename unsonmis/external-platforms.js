@@ -22,6 +22,7 @@
       <button type="button" data-platform="mixcloud">Mixcloud</button>
       <button type="button" data-platform="audiomack">Audiomack</button>
       <button type="button" data-platform="jamendo">Jamendo</button>
+      <button type="button" data-platform="freemusicarchive">Free Music Archive</button>
       <button type="button" data-platform="funkwhale">Funkwhale</button>
     </div>
     <hr class="community-divider">
@@ -56,6 +57,7 @@
     mixcloud: q => "https://www.mixcloud.com/search/?q=" + encodeURIComponent(q),
     audiomack: q => "https://audiomack.com/search/" + encodeURIComponent(q),
     jamendo: q => "https://www.jamendo.com/search?q=" + encodeURIComponent(q),
+    freemusicarchive: q => "https://freemusicarchive.org/search/?quicksearch=" + encodeURIComponent(q),
     funkwhale: () => "https://funkwhale.audio/"
   };
   function explore(platform) {
