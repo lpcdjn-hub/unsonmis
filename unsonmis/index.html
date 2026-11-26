@@ -614,8 +614,8 @@
       </div>
     </section>
 
-  <div id="tab-member" class="hidden">
-    <section class="member-panel">
+  <div id="tab-member" class="hidden" style="width:100%;min-height:220px;display:none">
+    <section class="member-panel" style="display:block;visibility:visible;min-height:180px">
       <h2>👤 Mon espace membre UNSONMIS</h2>
       <p class="community-note">Connectez-vous dans l’onglet Communauté pour accéder à votre espace personnel.</p>
       <div id="memberSignedOut" class="community-note">Vous devez être connecté pour consulter votre profil, vos favoris et vos playlists.</div>
@@ -1187,7 +1187,7 @@ function switchTab(tabName) {
   });
   ["radios","tracks","local","community","member"].forEach(name => {
     const panel = document.getElementById("tab-" + name);
-    if (panel) panel.classList.toggle("hidden", name !== tabName);
+    if (panel) { panel.classList.toggle("hidden", name !== tabName); panel.style.display = name === tabName ? "block" : "none"; }
   });
   if (tabName === "member" && typeof loadMemberDashboard === "function") {
     loadMemberDashboard().catch(error => {
@@ -1429,7 +1429,7 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   button.addEventListener("click", function () {
     ["radios", "tracks", "local", "community", "member"].forEach(function (name) {
       const panel = document.getElementById("tab-" + name);
-      if (panel) panel.classList.toggle("hidden", name !== "member");
+      if (panel) { panel.classList.toggle("hidden", name !== "member"); panel.style.display = name === "member" ? "block" : "none"; }
     });
     document.querySelectorAll(".tab-btn").forEach(function (tab) {
       tab.classList.toggle("active", tab.dataset.tab === "member");
