@@ -511,6 +511,7 @@
 <div class="tabs">
   <button class="tab-btn active" data-tab="radios">📻 Webradios (Tous styles)</button>
   <button class="tab-btn" data-tab="tracks">🎵 Découvertes Audius</button>
+  <button class="tab-btn" data-tab="free">🌍 Musique libre</button>
   <button class="tab-btn" data-tab="local">💾 Mes Sons (<span id="localCount">0</span>)</button>
   <button class="tab-btn" data-tab="community">🎤 Communauté</button>
   <button class="tab-btn" id="memberTabButton" type="button" data-tab="member" onclick="switchTab('member')">👤 Espace membre</button>
@@ -563,6 +564,17 @@
       <span id="trackStatus">Catalogue indépendant Audius</span>
     </div>
     <div class="track-list" id="trackList"></div>
+  </div>
+
+  <div id="tab-free" class="hidden">
+    <section class="community-panel">
+      <h2>🌍 Musique libre & indépendante</h2>
+      <p>Recherche dans Internet Archive. Les droits varient selon chaque enregistrement : vérifie la fiche et la licence avant toute réutilisation ou rediffusion.</p>
+      <div class="search-box"><input id="freeMusicSearch" type="search" placeholder="Chercher un titre, artiste ou style"><button id="freeMusicSearchBtn" type="button">Rechercher</button></div>
+      <div class="community-actions"><a class="action-pill" href="https://ccmixter.org/" target="_blank" rel="noopener noreferrer">🎼 Explorer ccMixter</a><a class="action-pill" href="https://archive.org/details/audio" target="_blank" rel="noopener noreferrer">🎧 Internet Archive</a></div>
+      <div class="section-info"><span id="freeMusicStatus">Recherche dans les archives audio gratuites.</span></div>
+      <div class="track-list" id="freeMusicList"></div>
+    </section>
   </div>
 
   <!-- TAB 3: LOCAL FILES -->
@@ -1201,7 +1213,7 @@ function switchTab(tabName) {
   document.querySelectorAll(".tab-btn").forEach(b => {
     b.classList.toggle("active", b.dataset.tab === tabName);
   });
-  ["radios","tracks","local","community","member"].forEach(name => {
+  ["radios","tracks","free","local","community","member"].forEach(name => {
     const panel = document.getElementById("tab-" + name);
     if (panel) { panel.classList.toggle("hidden", name !== tabName); panel.style.display = name === tabName ? "block" : "none"; }
   });
@@ -1458,6 +1470,48 @@ refreshCommunityAuth().catch(e=>communityMessage("Connexion au catalogue impossi
  exit.addEventListener("click",()=>toggle(false));
  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("focus-mode"))toggle(false);});
 })();
+
+async function searchFreeArchive(){
+ const input=document.getElementById("freeMusicSearch");
+ const list=document.getElementById("freeMusicList");
+ const status=document.getElementById("freeMusicStatus");
+ const query=input.value.trim()||"electronic music";
+ status.textContent="Recherche dans Internet Archive…";list.replaceChildren();
+ try{
+  const q='mediatype:audio AND (title:"'+query.replace(/["\\]/g," ")+'" OR creator:"'+query.replace(/["\\]/g," ")+'")';
+  const endpoint="https://archive.org/advancedsearch.php?q="+encodeURIComponent(q)+"&fl[]=identifier&fl[]=title&fl[]=creator&rows=12&output=json";
+  const response=await fetch(endpoint);if(!response.ok)throw new Error("Le catalogue ne répond pas.");
+  const data=await response.json(),docs=(data.response&&data.response.docs)||[];
+  const results=await Promise.all(docs.map(async doc=>{
+   try{
+    const mr=await fetch("https://archive.org/metadata/"+encodeURIComponent(doc.identifier));
+    if(!mr.ok)return null;const md=await mr.json();
+    const files=md.files||[];
+    const audio=files.find(f=>/\.(mp3|ogg|oga|opus|m4a)$/i.test(f.name||"")&&Number(f.size||0)>0&&!/sample|preview/i.test(f.name||""));
+    if(!audio)return null;
+    const path=audio.name.split("/").map(encodeURIComponent).join("/");
+    return {title:doc.title||audio.name,artist:Array.isArray(doc.creator)?doc.creator.join(", "):(doc.creator||"Artiste non renseigné"),url:"https://archive.org/download/"+encodeURIComponent(doc.identifier)+"/"+path,page:"https://archive.org/details/"+encodeURIComponent(doc.identifier),license:md.metadata&&(md.metadata.licenseurl||md.metadata.rights)||"Licence à vérifier sur la fiche"};
+   }catch(e){return null;}
+  }));
+  const tracks=results.filter(Boolean);
+  status.textContent=tracks.length+" morceau(x) lisible(s) trouvé(s) · Internet Archive";
+  tracks.forEach(track=>{
+   const card=document.createElement("div");card.className="card-item";
+   const art=document.createElement("div");art.className="art-box";art.textContent="🎵";
+   const meta=document.createElement("div");meta.className="item-meta";
+   const title=document.createElement("div");title.className="item-title";title.textContent=track.title;
+   const sub=document.createElement("div");sub.className="item-sub";sub.textContent=track.artist+" · "+String(track.license).slice(0,90);
+   const source=document.createElement("a");source.href=track.page;source.target="_blank";source.rel="noopener noreferrer";source.textContent="Voir la fiche et les droits";source.className="item-sub";
+   meta.append(title,sub,source);
+   const play=document.createElement("button");play.type="button";play.className="action-pill primary";play.textContent="▶ Écouter";
+   play.addEventListener("click",()=>playFromQueue([{title:track.title,artist:track.artist,url:track.url,isLive:false}],0));
+   card.append(art,meta,play);list.appendChild(card);
+  });
+  if(!tracks.length)status.textContent="Aucun fichier audio lisible trouvé. Essaie un autre mot-clé ou ouvre le catalogue.";
+ }catch(error){status.textContent="Recherche momentanément indisponible : "+(error.message||error);}
+}
+document.getElementById("freeMusicSearchBtn").addEventListener("click",searchFreeArchive);
+document.getElementById("freeMusicSearch").addEventListener("keydown",e=>{if(e.key==="Enter")searchFreeArchive();});
 // --- INIT ---
 renderRadios();
 initAudius().then(() => searchTracks("tekno tribe acid"));
