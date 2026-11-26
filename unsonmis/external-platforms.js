@@ -55,9 +55,7 @@
   panel.querySelectorAll("[data-platform]").forEach(btn => {
     btn.addEventListener("click", () => explore(btn.dataset.platform));
   });
-  document.getElementById("platformSearchBtn").addEventListener("click", () => {
-    ["soundcloud", "mixcloud", "audiomack", "jamendo"].forEach(explore);
-  });
+  document.getElementById("platformSearchBtn").addEventListener("click", () => explore("soundcloud"));
   search.addEventListener("keydown", e => {
     if (e.key === "Enter") explore("soundcloud");
   });
