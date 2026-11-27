@@ -571,6 +571,26 @@
 .app-project-link-list a span{font-size:.72rem;color:#d6f5df;font-weight:600}
 @media(max-width:600px){.app-project-links{margin:10px 12px 12px;padding:11px}.app-project-link-list{grid-template-columns:1fr}.app-project-link-list a{flex-direction:row;justify-content:space-between;padding:10px 13px}}
 
+
+/* Cinéma natif UNSONMIS */
+#tab-cinema .cine-head{padding:18px;border:1px solid #3a3030;border-radius:14px;background:linear-gradient(120deg,#241414,#101010);margin-bottom:14px}
+#tab-cinema .cine-head h2{color:var(--yellow);font-size:1.35rem;margin-bottom:6px}
+#tab-cinema .cine-head p{color:var(--muted);font-size:.88rem}
+#tab-cinema .cine-controls{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+#tab-cinema .cine-controls button{border:1px solid var(--border);background:var(--surface);color:var(--text);padding:9px 13px;border-radius:20px;font-weight:700}
+#tab-cinema .cine-controls button.active{background:var(--red);border-color:var(--red);color:white}
+#tab-cinema .cine-search{display:flex;gap:8px;margin:12px 0}
+#tab-cinema .cine-search input{flex:1;min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:12px}
+#tab-cinema .cine-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px}
+#tab-cinema .cine-card{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:10px;display:flex;flex-direction:column;gap:7px;min-width:0}
+#tab-cinema .cine-card img{width:100%;height:180px;object-fit:cover;border-radius:7px;background:#252525}
+#tab-cinema .cine-card h3{font-size:.9rem;line-height:1.3}
+#tab-cinema .cine-card p,#tab-cinema .cine-status{font-size:.78rem;color:var(--muted)}
+#tab-cinema .cine-card button{margin-top:auto;background:var(--red);color:white;border:0;border-radius:8px;padding:9px;font-weight:700}
+#tab-cinema .cine-status{padding:10px 0}
+#tab-cinema .cine-player{width:100%;aspect-ratio:16/9;border:0;border-radius:10px;background:#000}
+@media(max-width:480px){#tab-cinema .cine-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#tab-cinema .cine-card img{height:155px}}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -804,13 +824,24 @@
 </div>
 
 
-  <div id="tab-cinema" class="hidden" style="display:none;width:100%;min-height:70vh">
-    <section class="community-panel" style="margin-bottom:14px">
-      <h2>🎬 Cinéma — CinéLibre</h2>
-      <p>Retrouvez le catalogue de films et séries gratuits proposés par CinéLibre. La lecture intégrée dépend des autorisations de chaque diffuseur.</p>
-      <p><a href="https://lpcdjn-hub.github.io/cinelibre/" target="_blank" rel="noopener noreferrer">Ouvrir CinéLibre dans un nouvel onglet ↗</a></p>
+  <div id="tab-cinema" class="hidden" style="display:none;width:100%">
+    <section class="cine-head">
+      <h2>🎬 Le cinéma dans UNSONMIS</h2>
+      <p>Films du domaine public et sous licences Creative Commons, découverte de séries et chaînes en direct. Les catalogues et la lecture dépendent des sources et de leurs conditions.</p>
     </section>
-    <iframe src="https://lpcdjn-hub.github.io/cinelibre/" title="Catalogue CinéLibre" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen style="display:block;width:100%;height:75vh;min-height:520px;border:1px solid #444;border-radius:14px;background:#111"></iframe>
+    <div class="cine-controls" role="group" aria-label="Catégories cinéma">
+      <button type="button" class="active" data-cine-mode="films">🎞️ Films libres</button>
+      <button type="button" data-cine-mode="series">📺 Séries</button>
+      <button type="button" data-cine-mode="tv">🌍 Chaînes TV</button>
+    </div>
+    <div class="cine-search"><input id="cineSearchInput" type="search" placeholder="Rechercher un film, une série…"><button id="cineSearchBtn" type="button">Chercher</button></div>
+    <p class="cine-status" id="cineStatus" aria-live="polite">Chargement du catalogue de films libres…</p>
+    <div class="cine-grid" id="cineResults"></div>
+    <div id="cinePlayerBox" hidden style="margin-top:16px">
+      <div class="section-info"><strong id="cinePlayerTitle">Lecture</strong><button type="button" id="cinePlayerClose">✕ Fermer</button></div>
+      <iframe id="cinePlayerFrame" class="cine-player" title="Lecteur vidéo" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+      <p class="cine-status">La lecture intégrée n'est disponible que si la source l'autorise. Aucun contenu protégé n'est hébergé par UNSONMIS.</p>
+    </div>
   </div>
 
   <div id="tab-favorites" class="hidden" style="display:none">
@@ -1871,6 +1902,58 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
       });
     }
   });
+})();
+</script>
+
+
+<script>
+(function(){
+ const root=document.getElementById('tab-cinema'); if(!root)return;
+ const input=root.querySelector('#cineSearchInput'),btn=root.querySelector('#cineSearchBtn'),status=root.querySelector('#cineStatus'),results=root.querySelector('#cineResults');
+ const player=root.querySelector('#cinePlayerBox'),frame=root.querySelector('#cinePlayerFrame'),playerTitle=root.querySelector('#cinePlayerTitle');
+ let mode='films',timer=null,request=0;
+ const safe=s=>String(s||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+ function setMode(next){mode=next;root.querySelectorAll('[data-cine-mode]').forEach(b=>b.classList.toggle('active',b.dataset.cineMode===mode));input.placeholder=mode==='films'?'Rechercher un film du domaine public…':mode==='series'?'Rechercher une série…':'Rechercher une chaîne TV…';load();}
+ function render(items,kind){
+  if(!items.length){results.innerHTML='<div class="empty">Aucun résultat trouvé. Essaie un autre terme.</div>';return;}
+  results.innerHTML=items.map(x=>{
+   if(kind==='films')return '<article class="cine-card"><img src="https://archive.org/services/img/'+encodeURIComponent(x.identifier)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'"><p>Licence : '+(/publicdomain/i.test(x.licenseurl||'')?'Domaine public':'Creative Commons')+'</p><h3>'+safe(x.title||x.identifier)+'</h3><p>'+safe(x.year||'Année inconnue')+'</p><button data-film="'+safe(x.identifier)+'" data-title="'+safe(x.title||x.identifier)+'">▶ Regarder</button></article>';
+   if(kind==='series')return '<article class="cine-card">'+(x.image?.medium?'<img src="'+safe(x.image.medium)+'" alt="" loading="lazy">':'<div class="art-box">📺</div>')+'<h3>'+safe(x.name)+'</h3><p>'+safe(x.premiered||'Date inconnue')+' · '+safe((x.genres||[]).join(', '))+'</p><p>'+safe(String(x.summary||'').replace(/<[^>]*>/g,' ').slice(0,150))+'</p><p>Fiche et informations — disponibilité vidéo selon diffuseur.</p></article>';
+   return '<article class="cine-card"><div class="art-box">📡</div><h3>'+safe(x.name)+'</h3><p>'+safe(x.country||'International')+' · '+safe(x.languages||'Langue non précisée')+'</p><p>Flux référencé — disponibilité et droits variables.</p><a href="'+safe(x.url||'#')+'" target="_blank" rel="noopener noreferrer">Voir la source ↗</a></article>';
+  }).join('');
+  results.querySelectorAll('[data-film]').forEach(b=>b.addEventListener('click',()=>{playerTitle.textContent=b.dataset.title;frame.src='https://archive.org/embed/'+encodeURIComponent(b.dataset.film);player.hidden=false;player.scrollIntoView({behavior:'smooth',block:'center'});}));
+ }
+ async function load(){
+  const n=++request,term=input.value.trim();results.innerHTML='';status.textContent='Recherche en cours…';
+  try{
+   if(mode==='films'){
+    const clean=term.replace(/[^a-zA-Z0-9À-ÿ\s]/g,' ').trim().split(/\s+/).filter(Boolean).join(' AND ');
+    const q='mediatype:movies'+(clean?' AND title:('+clean+')':'');
+    const p=new URLSearchParams({q,rows:'48',page:'1',output:'json',sort:'downloads desc'});
+    ['identifier','title','year','licenseurl'].forEach(f=>p.append('fl[]',f));
+    const r=await fetch('https://archive.org/advancedsearch.php?'+p);if(!r.ok)throw Error('Catalogue indisponible');
+    const d=await r.json();if(n!==request)return;
+    const items=(d.response?.docs||[]).filter(x=>x.identifier&&(/publicdomain|creativecommons\.org\/licenses\//i.test(x.licenseurl||'')));
+    status.textContent=items.length+' film(s) libres trouvés — Internet Archive.';render(items,'films');
+   }else if(mode==='series'){
+    const r=await fetch('https://api.tvmaze.com/search/shows?q='+encodeURIComponent(term||'popular'));if(!r.ok)throw Error('Catalogue indisponible');
+    const d=await r.json();if(n!==request)return;const items=d.map(x=>x.show).filter(Boolean).slice(0,30);
+    status.textContent=items.length+' série(s) — fiches TVMaze, lecture non fournie par ce catalogue.';render(items,'series');
+   }else{
+    const [cr,sr]=await Promise.all([fetch('https://iptv-org.github.io/api/channels.json'),fetch('https://iptv-org.github.io/api/streams.json')]);
+    if(!cr.ok||!sr.ok)throw Error('Catalogue TV indisponible');
+    const [channels,streams]=await Promise.all([cr.json(),sr.json()]);if(n!==request)return;
+    const available=new Set(streams.filter(s=>s.url&&s.url.startsWith('https://')&&!(s.labels||[]).includes('Geo-blocked')).map(s=>s.channel));
+    const items=channels.filter(x=>available.has(x.id)&&!x.is_nsfw&&!x.closed&&(!term||x.name.toLowerCase().includes(term.toLowerCase()))).slice(0,60).map(x=>({name:x.name,country:x.country,languages:(x.languages||[]).join(', '),url:'https://iptv-org.github.io/'}));
+    status.textContent=items.length+' chaîne(s) avec flux référencé — répertoire communautaire IPTV-org.';render(items,'tv');
+   }
+  }catch(e){if(n===request)status.textContent='Le catalogue est momentanément indisponible. Réessaie plus tard.';}
+ }
+ root.querySelectorAll('[data-cine-mode]').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.cineMode)));
+ btn.addEventListener('click',load);input.addEventListener('keydown',e=>{if(e.key==='Enter')load();});
+ input.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(load,450);});
+ root.querySelector('#cinePlayerClose').addEventListener('click',()=>{frame.src='';player.hidden=true;});
+ setMode('films');
 })();
 </script>
 
