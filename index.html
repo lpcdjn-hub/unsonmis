@@ -367,6 +367,8 @@
     opacity: 0.45;
     cursor: not-allowed;
   }
+  .favorite-btn { flex:0 0 auto; border:1px solid #b58b24; border-radius:8px; background:#28200d; color:#ffd45a; padding:8px 10px; font-size:0.78rem; font-weight:700; cursor:pointer; white-space:nowrap; }
+  .favorite-btn.is-favorite { background:#4a3510; border-color:#f2b705; }
 
   /* Equalizer Canvas */
   #visualizer {
@@ -489,6 +491,7 @@
   <button class="tab-btn active" data-tab="radios">📻 Webradios (Tous styles)</button>
   <button class="tab-btn" data-tab="tracks">🎵 Découvertes Audius</button>
   <button class="tab-btn" data-tab="local">💾 Mes Sons (<span id="localCount">0</span>)</button>
+  <button class="tab-btn" data-tab="favorites">⭐ Mes Favoris (<span id="favoriteCount">0</span>)</button>
 </div>
 
 <div class="container">
@@ -562,6 +565,11 @@
     </div>
   </div>
 
+  <div id="tab-favorites" class="hidden">
+    <div class="section-info"><span>Vos radios et musiques préférées, réunies ici</span><span id="favoriteStatus"></span></div>
+    <div class="track-list" id="favoritesList"></div>
+  </div>
+
 </div>
 
 <!-- PLAYER BAR -->
@@ -632,7 +640,27 @@ let isLiveStream = false;
 let isShuffle = false;
 let isLoop = false;
 let localTracks = [];
-let audiusHost = "https://discoveryprovider.audius.co";
+let sessionOnlyFavorites = [];
+function readFavorites() {
+  try { const value = JSON.parse(localStorage.getItem("unsonmis_favorites") || "[]"); return Array.isArray(value) ? value.filter(x => x && x.url && x.title && x.kind) : []; }
+  catch (error) { return []; }
+}
+let favorites = readFavorites();
+function favoriteKey(item, kind) { return kind + "|" + item.url; }
+function isFavorite(item, kind) { return favorites.concat(sessionOnlyFavorites).some(f => favoriteKey(f, f.kind) === favoriteKey(item, kind)); }
+function saveFavorites() { try { localStorage.setItem("unsonmis_favorites", JSON.stringify(favorites)); } catch (error) {} }
+function toggleFavorite(item, kind) {
+  const key = favoriteKey(item, kind);
+  if (isFavorite(item, kind)) {
+    favorites = favorites.filter(f => favoriteKey(f, f.kind) !== key);
+    sessionOnlyFavorites = sessionOnlyFavorites.filter(f => favoriteKey(f, f.kind) !== key);
+  } else {
+    const saved = {kind, title:item.title || "Sans titre", artist:item.artist || "", url:item.url, source:item.source || "", page:item.page || "", artwork:item.artwork || "", license:item.license || ""};
+    if (String(item.url).startsWith("blob:")) sessionOnlyFavorites.push(saved); else favorites.push(saved);
+  }
+  saveFavorites(); renderFavorites();
+}
+
 
 // --- WEBRADIOS DATABASE (TOUS STYLES) ---
 const defaultRadios = [
@@ -696,10 +724,10 @@ function renderRadios() {
     const badge = document.createElement("span");
     badge.className = "badge live";
     badge.textContent = `LIVE • ${radio.genre.split('/')[0].trim()}`;
-    const shareBtn = createShareButton({
-      title: radio.name, artist: radio.desc, url: radio.url, isLive: true
-    }, "radio");
-    div.append(art, meta, badge, shareBtn);
+    const radioItem = { title: radio.name, artist: radio.desc, url: radio.url, isLive: true };
+    const shareBtn = createShareButton(radioItem, "radio");
+    const favoriteBtn = createFavoriteButton(radioItem, "radio");
+    div.append(art, meta, badge, shareBtn, favoriteBtn);
     div.onclick = () => {
       const queue = filtered.map(r => ({
         title: r.name,
@@ -795,7 +823,8 @@ function renderExternalTracks(tracks, sourceLabel) {
     }
     const badge = document.createElement("span"); badge.className = "badge"; badge.textContent = track.source || sourceLabel;
     const shareBtn = createShareButton(track, "track");
-    div.append(art, meta, badge, shareBtn);
+    const favoriteBtn = createFavoriteButton(track, "track");
+    div.append(art, meta, badge, shareBtn, favoriteBtn);
     div.onclick = () => playFromQueue(queue, idx);
     list.appendChild(div);
   });
@@ -981,7 +1010,8 @@ function renderLocalTracks() {
     badge.className = "badge";
     badge.textContent = "LOCAL";
     const shareBtn = createShareButton(track, "local");
-    div.append(art, meta, badge, shareBtn);
+    const favoriteBtn = createFavoriteButton(track, "local");
+    div.append(art, meta, badge, shareBtn, favoriteBtn);
     div.onclick = () => playFromQueue(localTracks, idx);
     list.appendChild(div);
   });
@@ -1045,6 +1075,39 @@ async function shareContent(item, kind) {
   } catch (error) {
     if (error && error.name !== "AbortError") alert("Le partage n'a pas abouti. Réessaie.");
   }
+}
+
+function createFavoriteButton(item, kind) {
+  const button = document.createElement("button"); button.type = "button";
+  const update = () => { const active = isFavorite(item, kind); button.className = "favorite-btn" + (active ? " is-favorite" : ""); button.textContent = active ? "★ Favori" : "☆ Favori"; button.title = active ? "Retirer des favoris" : "Ajouter aux favoris"; };
+  update();
+  button.addEventListener("click", event => { event.stopPropagation(); toggleFavorite(item, kind); update(); });
+  return button;
+}
+function renderFavorites() {
+  const list = document.getElementById("favoritesList"); if (!list) return;
+  const all = favorites.concat(sessionOnlyFavorites);
+  document.getElementById("favoriteCount").textContent = all.length;
+  document.getElementById("favoriteStatus").textContent = all.length + " élément(s)";
+  list.innerHTML = "";
+  if (!all.length) { const empty = document.createElement("div"); empty.className = "section-info"; empty.textContent = "Aucun favori. Appuyez sur ☆ Favori sur une radio ou une musique."; list.appendChild(empty); return; }
+  all.forEach(item => {
+    const div = document.createElement("div"); div.className = "card-item";
+    const art = document.createElement("div"); art.className = "art-box"; art.textContent = item.kind === "radio" ? "📻" : "🎵";
+    const meta = document.createElement("div"); meta.className = "item-meta";
+    const title = document.createElement("div"); title.className = "item-title"; title.textContent = item.title;
+    const sub = document.createElement("div"); sub.className = "item-sub"; sub.textContent = item.artist || (item.kind === "radio" ? "Webradio" : "Musique"); meta.append(title, sub);
+    const badge = document.createElement("span"); badge.className = "badge"; badge.textContent = item.kind === "radio" ? "RADIO" : "MUSIQUE";
+    const remove = document.createElement("button"); remove.type = "button"; remove.className = "favorite-btn is-favorite"; remove.textContent = "★ Retirer";
+    remove.addEventListener("click", event => { event.stopPropagation(); toggleFavorite(item, item.kind); });
+    div.append(art, meta, badge, remove);
+    div.addEventListener("click", () => {
+      if (String(item.url).startsWith("blob:") && !sessionOnlyFavorites.some(f => favoriteKey(f, f.kind) === favoriteKey(item, item.kind))) { alert("Ce fichier local n'est plus disponible. Rechargez-le depuis votre appareil."); return; }
+      playFromQueue([{title:item.title, artist:item.artist, url:item.url, isLive:item.kind === "radio", source:item.source, artwork:item.artwork, license:item.license}], 0);
+      switchTab(item.kind === "radio" ? "radios" : "tracks");
+    });
+    list.appendChild(div);
+  });
 }
 
 function syncPlaybackButton() {
@@ -1278,6 +1341,8 @@ function switchTab(tabName) {
   document.getElementById("tab-radios").classList.toggle("hidden", tabName !== "radios");
   document.getElementById("tab-tracks").classList.toggle("hidden", tabName !== "tracks");
   document.getElementById("tab-local").classList.toggle("hidden", tabName !== "local");
+  document.getElementById("tab-favorites").classList.toggle("hidden", tabName !== "favorites");
+  if (tabName === "favorites") renderFavorites();
 }
 
 document.querySelectorAll(".tab-btn").forEach(btn => {
@@ -1299,6 +1364,7 @@ document.getElementById("closePwaModal").onclick = () => {
 
 // --- INIT ---
 renderRadios();
+renderFavorites();
 
 // Ouvre directement le contenu précis reçu dans un lien de partage.
 try {
