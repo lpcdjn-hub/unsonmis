@@ -1,27 +1,64 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1600" preserveAspectRatio="xMidYMid slice">
 <defs>
- <linearGradient id="wall" x2="0" y2="1"><stop stop-color="#29272b"/><stop offset=".18" stop-color="#111114"/><stop offset=".78" stop-color="#08090c"/><stop offset="1" stop-color="#171116"/></linearGradient>
- <linearGradient id="floor" x2="0" y2="1"><stop stop-color="#09090c"/><stop offset="1" stop-color="#25202a"/></linearGradient>
- <radialGradient id="glow"><stop stop-color="#fff" stop-opacity=".85"/><stop offset=".2" stop-color="#ff00a8" stop-opacity=".55"/><stop offset="1" stop-color="#ff00a8" stop-opacity="0"/></radialGradient>
- <radialGradient id="speaker"><stop stop-color="#aaa"/><stop offset=".12" stop-color="#202127"/><stop offset=".28" stop-color="#090a0d"/><stop offset=".48" stop-color="#38333b"/><stop offset=".53" stop-color="#ff4b08"/><stop offset=".58" stop-color="#17151a"/><stop offset=".9" stop-color="#050609"/><stop offset="1" stop-color="#777"/>
+ <linearGradient id="wall" x2="0" y2="1"><stop stop-color="#18171b"/><stop offset=".45" stop-color="#08090d"/><stop offset=".83" stop-color="#09090c"/><stop offset="1" stop-color="#171018"/></linearGradient>
+ <linearGradient id="floor" x2="0" y2="1"><stop stop-color="#101015"/><stop offset="1" stop-color="#020204"/></linearGradient>
+ <radialGradient id="pink"><stop stop-color="#ff47dc" stop-opacity=".95"/><stop offset=".28" stop-color="#ff008d" stop-opacity=".5"/><stop offset="1" stop-color="#ff008d" stop-opacity="0"/></radialGradient>
+ <radialGradient id="green"><stop stop-color="#baff36" stop-opacity=".9"/><stop offset=".3" stop-color="#00ff5e" stop-opacity=".5"/><stop offset="1" stop-color="#00ff5e" stop-opacity="0"/></radialGradient>
+ <radialGradient id="blue"><stop stop-color="#19eaff" stop-opacity=".8"/><stop offset="1" stop-color="#00aaff" stop-opacity="0"/></radialGradient>
+ <radialGradient id="speaker"><stop stop-color="#c5c6ca"/><stop offset=".1" stop-color="#111217"/><stop offset=".28" stop-color="#050508"/><stop offset=".43" stop-color="#34343a"/><stop offset=".48" stop-color="#ff3517"/><stop offset=".53" stop-color="#08090d"/><stop offset=".9" stop-color="#030306"/><stop offset="1" stop-color="#777"/>
  </radialGradient>
- <pattern id="brick" width="180" height="90" patternUnits="userSpaceOnUse"><path d="M0 0H180M0 45H180M90 0V45M0 45V90M180 45V90" fill="none" stroke="#777" stroke-opacity=".18" stroke-width="5"/><path d="M4 4H176M4 49H86" stroke="#fff" stroke-opacity=".035" stroke-width="2"/></pattern>
- <filter id="blur"><feGaussianBlur stdDeviation="30"/></filter>
- <filter id="shadow"><feGaussianBlur stdDeviation="8"/></filter>
+ <pattern id="brick" width="180" height="90" patternUnits="userSpaceOnUse"><path d="M0 0H180M0 45H180M90 0V45M0 45V90M180 45V90" fill="none" stroke="#85818b" stroke-opacity=".22" stroke-width="5"/><path d="M5 5H175M5 50H85" stroke="#fff" stroke-opacity=".045" stroke-width="2"/></pattern>
+ <filter id="glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="13"/></filter>
+ <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>
+ <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="18"/></filter>
 </defs>
-<rect width="900" height="1600" fill="url(#wall)"/><rect width="900" height="1500" fill="url(#brick)" opacity=".8"/>
-<path d="M0 0H900V160L820 130 750 175 680 110 610 160 540 105 450 155 360 105 280 165 190 115 110 170 0 130Z" fill="#050508" stroke="#aaa" stroke-opacity=".35" stroke-width="14"/>
-<path d="M0 160Q95 90 170 200L140 1450H0ZM900 150Q800 95 730 205L760 1450H900Z" fill="#050508" opacity=".8"/>
-<ellipse cx="70" cy="300" rx="190" ry="260" fill="#ff00a8" opacity=".18" filter="url(#blur)"/><ellipse cx="830" cy="450" rx="180" ry="260" fill="#00d9ff" opacity=".16" filter="url(#blur)"/>
-<g opacity=".95"><circle cx="92" cy="270" r="115" fill="#05060a" stroke="#ff3b19" stroke-width="15"/><circle cx="92" cy="270" r="90" fill="url(#speaker)" stroke="#aaa" stroke-width="5"/><circle cx="92" cy="270" r="28" fill="#05060a" stroke="#777" stroke-width="5"/><circle cx="812" cy="320" r="118" fill="#05060a" stroke="#ff3b19" stroke-width="15"/><circle cx="812" cy="320" r="92" fill="url(#speaker)" stroke="#aaa" stroke-width="5"/><circle cx="812" cy="320" r="29" fill="#05060a" stroke="#777" stroke-width="5"/></g>
-<g fill="none" stroke-linecap="round" stroke-width="12" opacity=".9"><path d="M15 540Q100 480 170 550T300 540" stroke="#ff00b8"/><path d="M600 600Q700 540 770 600T900 570" stroke="#00ff7b"/><path d="M0 950Q90 880 180 950T300 930" stroke="#ffe000"/><path d="M610 1030Q700 960 780 1030T900 1000" stroke="#ff1744"/></g>
-<g fill="#ff00b8" opacity=".8"><path d="M40 620l20 90 14-50 30 85 12-110 35 65 25-90 12 100 30-45 20 85-80 80-80-30Z"/><circle cx="35" cy="730" r="12"/><circle cx="160" cy="790" r="9"/><circle cx="120" cy="850" r="7"/></g>
-<g fill="#ffe000" opacity=".9"><path d="M745 710l18 90 15-60 25 75 14-105 30 50 22-65 12 95 20-40 20 65-80 75-90-40Z"/></g>
-<g stroke-width="10" stroke-linecap="round" fill="none"><path d="M35 1020V900M65 1040V850M95 1040V920M125 1040V880M155 1040V940" stroke="#00ff65"/><path d="M745 1040V900M775 1040V850M805 1040V920M835 1040V880M865 1040V940" stroke="#ff00a8"/></g>
-<path d="M0 1370L900 1370V1600H0Z" fill="url(#floor)"/><path d="M0 1390H900" stroke="#777" stroke-opacity=".3" stroke-width="5"/>
-<g opacity=".75"><path d="M80 1420h740" stroke="#00eaff" stroke-width="3"/><path d="M120 1450h660" stroke="#ff00a8" stroke-width="4"/><path d="M180 1490h540" stroke="#ffe000" stroke-width="4"/></g>
-<g opacity=".9"><path d="M250 1380v90m30-90v120m30-120v75m30-75v110m30-110v130m30-130v95m30-95v145m30-145v120m30-120v95m30-95v135m30-135v100m30-100v125m30-125v90m30-90v110" stroke-width="15" stroke-linecap="round" stroke="#00f0ff"/></g>
-<path d="M0 0L45 80 15 130 70 180 25 250 75 310 20 390 70 450 10 520 65 600 0 670M900 0L855 85 890 150 835 220 875 300 825 370 890 450 835 530 900 610" fill="none" stroke="#ff00a8" stroke-width="18" opacity=".75"/>
-<g fill="#ffe000" opacity=".9"><path d="M55 500l18-70 18 70 70 18-70 18-18 70-18-70-70-18Z"/><path d="M820 560l14-55 14 55 55 14-55 14-14 55-14-55-55-14Z"/></g>
-<rect width="900" height="1600" fill="none" stroke="#000" stroke-width="50" opacity=".5"/>
+<rect width="900" height="1600" fill="url(#wall)"/><rect width="900" height="1450" fill="url(#brick)"/>
+<!-- cracked ceiling -->
+<path d="M0 0H900V125L830 98 775 145 705 90 640 142 560 82 480 135 410 85 330 145 250 92 175 150 90 92 0 145Z" fill="#030305" stroke="#777" stroke-opacity=".55" stroke-width="13"/>
+<path d="M0 0L45 80 22 145 80 180 34 245 95 290 50 350M900 0L852 74 884 140 824 202 870 270 815 334" fill="none" stroke="#aaa" stroke-opacity=".45" stroke-width="15"/>
+<!-- colored haze -->
+<ellipse cx="70" cy="410" rx="260" ry="330" fill="url(#pink)"/><ellipse cx="840" cy="470" rx="260" ry="360" fill="url(#blue)"/><ellipse cx="80" cy="1020" rx="240" ry="300" fill="url(#green)"/><ellipse cx="840" cy="1080" rx="230" ry="300" fill="url(#pink)"/>
+<!-- neon graffiti swashes -->
+<g fill="none" stroke-linecap="round" stroke-linejoin="round">
+ <path d="M-30 260Q70 110 130 245T260 240M-25 310Q70 170 150 300T285 285" stroke="#ff168e" stroke-width="18" filter="url(#soft)"/><path d="M-30 260Q70 110 130 245T260 240" stroke="#ff20ae" stroke-width="9"/>
+ <path d="M650 250Q730 100 800 240T940 220M660 300Q755 160 830 300T950 280" stroke="#ff3d12" stroke-width="17" filter="url(#soft)"/><path d="M650 250Q730 100 800 240T940 220" stroke="#ffcf00" stroke-width="8"/>
+ <path d="M-30 710Q75 600 145 730T300 700M-20 780Q70 660 170 780T300 760" stroke="#ff00b8" stroke-width="18"/><path d="M600 760Q690 620 780 750T940 720" stroke="#00ff67" stroke-width="16"/>
+ <path d="M-25 1050Q90 930 180 1060T315 1040M625 1090Q735 950 830 1080T950 1050" stroke="#ffe000" stroke-width="17"/>
+</g>
+<!-- paint drips and splashes -->
+<g fill="#ff149b"><path d="M25 400l16 70 14-38 24 95 15-116 26 70 18-88 20 110 25-42 17 95-76 75-90-34Z"/><circle cx="35" cy="585" r="13"/><circle cx="155" cy="620" r="9"/><circle cx="120" cy="670" r="6"/><path d="M755 520l16 60 15-35 22 78 13-90 24 58 16-75 18 90 18-30 18 72-78 66-88-35Z"/></g>
+<g fill="#faff00"><path d="M22 900l20-75 20 75 75 20-75 20-20 75-20-75-75-20Z"/><path d="M800 880l16-62 16 62 62 16-62 16-16 62-16-62-62-16Z"/></g>
+<g fill="#00ff63"><circle cx="90" cy="850" r="10"/><circle cx="155" cy="920" r="7"/><circle cx="820" cy="720" r="12"/><circle cx="755" cy="820" r="7"/></g>
+<!-- side speakers -->
+<g>
+ <circle cx="92" cy="330" r="132" fill="#030407" stroke="#d7d7d7" stroke-width="7"/><circle cx="92" cy="330" r="116" fill="#08090d" stroke="#ff1598" stroke-width="12"/><circle cx="92" cy="330" r="96" fill="url(#speaker)" stroke="#555" stroke-width="5"/><circle cx="92" cy="330" r="35" fill="#08090d" stroke="#a9a9aa" stroke-width="6"/><circle cx="92" cy="330" r="12" fill="#aaa"/>
+ <circle cx="815" cy="390" r="138" fill="#030407" stroke="#d7d7d7" stroke-width="7"/><circle cx="815" cy="390" r="120" fill="#08090d" stroke="#ff4b18" stroke-width="12"/><circle cx="815" cy="390" r="98" fill="url(#speaker)" stroke="#555" stroke-width="5"/><circle cx="815" cy="390" r="35" fill="#08090d" stroke="#a9a9aa" stroke-width="6"/><circle cx="815" cy="390" r="12" fill="#aaa"/>
+</g>
+<!-- DJ silhouette and headphones on left -->
+<g transform="translate(22 800)">
+ <path d="M20 150Q20 65 93 48Q160 64 165 150L150 210H32Z" fill="#020205" stroke="#15151b" stroke-width="8"/>
+ <circle cx="94" cy="42" r="43" fill="#030306" stroke="#777" stroke-width="5"/><path d="M52 35Q95 -20 137 35L143 68 48 68Z" fill="#050508"/><path d="M48 30Q25 40 38 92M140 30Q165 40 150 92" fill="none" stroke="#ff1a98" stroke-width="12"/><path d="M62 65L125 65" stroke="#ddd" stroke-width="5"/>
+ <path d="M0 235L210 235 180 290H25Z" fill="#08090d" stroke="#ff1a98" stroke-width="6"/><path d="M25 230L75 205 125 230 180 205" fill="none" stroke="#ffe000" stroke-width="7"/>
+</g>
+<!-- right crown graffiti -->
+<path d="M735 575l24-72 38 42 39-66 26 83 43-25-24 82H740Z" fill="none" stroke="#ffe000" stroke-width="12" stroke-linejoin="round" filter="url(#soft)"/><path d="M735 575l24-72 38 42 39-66 26 83" fill="none" stroke="#ffe000" stroke-width="8" stroke-linejoin="round"/>
+<!-- side equalizer bars -->
+<g stroke-linecap="round" stroke-width="13"><path d="M35 1190V1060M65 1190V1015M95 1190V1090M125 1190V1035M155 1190V1110" stroke="#00ff69"/><path d="M745 1190V1055M775 1190V1015M805 1190V1085M835 1190V1035M865 1190V1110" stroke="#ff169d"/></g>
+<!-- stage floor perspective -->
+<path d="M0 1315L900 1315V1600H0Z" fill="url(#floor)"/><path d="M0 1325H900" stroke="#aaa" stroke-opacity=".3" stroke-width="6"/>
+<path d="M450 1320L0 1600M450 1320L150 1600M450 1320L300 1600M450 1320L600 1600M450 1320L750 1600M450 1320L900 1600" stroke="#555" stroke-opacity=".35" stroke-width="4"/>
+<g fill="none" stroke-linecap="round" filter="url(#soft)">
+ <path d="M160 1590L360 1340M260 1590L410 1340M360 1590L450 1340M460 1590L490 1340" stroke="#ff149b" stroke-width="14"/>
+ <path d="M500 1590L490 1340M600 1590L530 1340M700 1590L570 1340M800 1590L610 1340" stroke="#00f5ff" stroke-width="14"/>
+ <path d="M0 1540L380 1360M0 1470L370 1350M900 1540L520 1360M900 1470L530 1350" stroke="#ffe000" stroke-width="10"/>
+</g>
+<!-- luminous equalizer floor -->
+<g stroke-linecap="round" stroke-width="17">
+ <path d="M210 1450v-45m35 70v-110m35 135v-160m35 180v-105m35 110v-210m35 235v-145m35 145v-195m35 195v-245m35 245v-175m35 175v-225m35 225v-150m35 150v-200m35 150v-115m35 115v-165" stroke="#00f0ff"/>
+ <path d="M250 1510v-35m35 65v-95m35 110v-130m35 140v-80m35 85v-150m35 155v-110m35 110v-140m35 140v-170m35 170v-125m35 125v-150m35 125v-95m35 95v-120" stroke="#ff00a8"/>
+</g>
+<!-- paint splatter -->
+<g fill="#ffe000"><circle cx="58" cy="1280" r="8"/><circle cx="90" cy="1250" r="5"/><circle cx="130" cy="1295" r="7"/><circle cx="850" cy="1280" r="8"/></g>
+<g fill="#00ff66"><circle cx="730" cy="1280" r="8"/><circle cx="780" cy="1250" r="5"/><circle cx="820" cy="1295" r="7"/></g>
+<rect width="900" height="1600" fill="none" stroke="#000" stroke-width="38" opacity=".48"/>
 </svg>
