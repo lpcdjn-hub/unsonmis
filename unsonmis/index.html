@@ -959,7 +959,26 @@ function addRadioActions(radio, container){
  });
  actions.append(share,fav); container.appendChild(actions);
 }
+
 window.addRadioActions = addRadioActions;
+window.unsonmisToggleRadioFavorite = function(radio){
+ if(!radio||!radio.url)return false;
+ const exists=unsonmisRadioFavorites.some(x=>x.url===radio.url);
+ if(exists) unsonmisRadioFavorites=unsonmisRadioFavorites.filter(x=>x.url!==radio.url);
+ else unsonmisRadioFavorites.push({kind:"radio",name:radio.name||"Radio",desc:radio.desc||"Radio en direct",url:radio.url});
+ saveRadioFavorites();updateRadioFavoriteCount();
+ if(document.getElementById("tab-favorites")&&!document.getElementById("tab-favorites").classList.contains("hidden"))renderRadioFavorites();
+ return !exists;
+};
+window.unsonmisShareRadio = async function(radio){
+ if(!radio||!radio.url)return;
+ const target=new URL(window.location.pathname,window.location.origin);
+ target.searchParams.set("radio",JSON.stringify({name:radio.name,desc:radio.desc,url:radio.url}));
+ const data={title:"UNSONMIS — "+(radio.name||"Radio"),text:"Écoute cette radio sur UNSONMIS : "+(radio.name||"Radio"),url:target.toString()};
+ try{if(navigator.share)await navigator.share(data);else if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(target.toString());alert("Lien de cette radio copié !");}else window.prompt("Copie le lien de cette radio :",target.toString());}
+ catch(err){if(err&&err.name!=="AbortError")alert("Le partage n'a pas abouti. Réessaie.");}
+};
+
 function addMusicActions(track, container, sourceName){
  const item={name:track.title||"Musique",desc:track.artist||sourceName||"Musique",url:track.url,source:sourceName||track.source||""};
  if(!item.url || !/^https?:\/\//i.test(item.url)) return;
@@ -1803,7 +1822,7 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
 </script>
 
 <script src="./external-platforms.js?v=20261127-favorites-share"></script>
-<script src="./world-radio.js?v=20261127-share-fix"></script>
+<script src="./world-radio.js?v=20261127-share-fix2"></script>
 <script>
 /* Navigation de secours indépendante du script principal */
 (function () {
