@@ -572,7 +572,6 @@
         <div class="np-title" id="npTitle">Prêt à diffuser le son libre</div>
         <div class="np-artist" id="npArtist">Choisissez une webradio ou un morceau</div>
       </div>
-      <button class="share-radio-btn" id="shareRadioBtn" type="button" disabled title="Choisissez une webradio pour la partager">↗ Partager</button>
       <canvas id="visualizer" width="220" height="64"></canvas>
     </div>
 
@@ -697,7 +696,10 @@ function renderRadios() {
     const badge = document.createElement("span");
     badge.className = "badge live";
     badge.textContent = `LIVE • ${radio.genre.split('/')[0].trim()}`;
-    div.append(art, meta, badge);
+    const shareBtn = createShareButton({
+      title: radio.name, artist: radio.desc, url: radio.url, isLive: true
+    }, "radio");
+    div.append(art, meta, badge, shareBtn);
     div.onclick = () => {
       const queue = filtered.map(r => ({
         title: r.name,
@@ -792,7 +794,8 @@ function renderExternalTracks(tracks, sourceLabel) {
       meta.appendChild(lic);
     }
     const badge = document.createElement("span"); badge.className = "badge"; badge.textContent = track.source || sourceLabel;
-    div.append(art, meta, badge);
+    const shareBtn = createShareButton(track, "track");
+    div.append(art, meta, badge, shareBtn);
     div.onclick = () => playFromQueue(queue, idx);
     list.appendChild(div);
   });
@@ -977,7 +980,8 @@ function renderLocalTracks() {
     const badge = document.createElement("span");
     badge.className = "badge";
     badge.textContent = "LOCAL";
-    div.append(art, meta, badge);
+    const shareBtn = createShareButton(track, "local");
+    div.append(art, meta, badge, shareBtn);
     div.onclick = () => playFromQueue(localTracks, idx);
     list.appendChild(div);
   });
@@ -988,53 +992,60 @@ const playPauseButton = document.getElementById("playPauseBtn");
 let confirmedPlaying = false;
 let playAttemptTimer = null;
 
-const shareRadioButton = document.getElementById("shareRadioBtn");
-
-function syncShareRadioButton() {
-  const item = currentQueue[currentIndex];
-  const canShare = !!(item && item.isLive);
-  shareRadioButton.disabled = !canShare;
-  shareRadioButton.title = canShare
-    ? "Partager la webradio actuellement sélectionnée"
-    : "Choisissez une webradio pour la partager";
+// Partage individuel : chaque carte partage exactement le contenu choisi.
+function createShareButton(item, kind) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "share-radio-btn";
+  button.textContent = "↗ Partager";
+  button.title = kind === "local" && String(item.url || "").startsWith("blob:")
+    ? "Ce fichier reste sur cet appareil et ne peut pas être partagé par lien"
+    : "Partager ce contenu précis";
+  if (kind === "local" && String(item.url || "").startsWith("blob:")) {
+    button.disabled = true;
+  }
+  button.addEventListener("click", event => {
+    event.stopPropagation();
+    if (kind === "local") {
+      alert("Ce fichier est stocké uniquement sur ton appareil. Pour le partager, il faut d'abord le publier sur un hébergement accessible.");
+      return;
+    }
+    shareContent(item, kind);
+  });
+  return button;
 }
 
-async function shareCurrentRadio() {
-  const item = currentQueue[currentIndex];
-  if (!item || !item.isLive) {
-    alert("Choisissez d'abord une webradio à partager.");
+async function shareContent(item, kind) {
+  if (!item || !item.url || !/^https?:\/\//i.test(item.url)) {
+    alert("Ce contenu ne possède pas de lien public partageable.");
     return;
   }
-
-  const shareUrl = new URL(window.location.href);
-  shareUrl.searchParams.set("radio", JSON.stringify({
-    name: item.title,
-    desc: item.artist,
-    url: item.url
-  }));
+  const shareUrl = new URL(window.location.pathname, window.location.origin);
+  const payload = {
+    name: item.title || "Contenu UNSONMIS",
+    desc: item.artist || "",
+    url: item.url,
+    source: item.source || ""
+  };
+  shareUrl.searchParams.set(kind === "radio" ? "radio" : "track", JSON.stringify(payload));
   const shareData = {
-    title: "UNSONMIS — " + item.title,
-    text: "Écoute cette radio sur UNSONMIS : " + item.title,
+    title: "UNSONMIS — " + payload.name,
+    text: (kind === "radio" ? "Écoute cette webradio sur UNSONMIS : " : "Découvre ce morceau sur UNSONMIS : ") + payload.name,
     url: shareUrl.toString()
   };
-
   try {
     if (navigator.share) {
       await navigator.share(shareData);
     } else if (navigator.clipboard && window.isSecureContext) {
       await navigator.clipboard.writeText(shareUrl.toString());
-      alert("Lien de la radio copié. Tu peux maintenant le partager !");
+      alert("Lien copié ! Tu peux maintenant le partager.");
     } else {
-      window.prompt("Copie le lien de cette radio :", shareUrl.toString());
+      window.prompt("Copie ce lien pour le partager :", shareUrl.toString());
     }
   } catch (error) {
-    if (error && error.name !== "AbortError") {
-      alert("Le partage n'a pas abouti. Réessaie ou copie le lien.");
-    }
+    if (error && error.name !== "AbortError") alert("Le partage n'a pas abouti. Réessaie.");
   }
 }
-
-shareRadioButton.addEventListener("click", shareCurrentRadio);
 
 function syncPlaybackButton() {
   playPauseButton.textContent = confirmedPlaying ? "⏸" : "▶";
@@ -1123,8 +1134,7 @@ function playFromQueue(queue, index) {
 
   renderRadios();
   if (localTracks.length > 0) renderLocalTracks();
-  syncShareRadioButton();
-}
+  }
 
 playPauseButton.onclick = async () => {
   if (!audio.src) {
@@ -1291,27 +1301,30 @@ document.getElementById("closePwaModal").onclick = () => {
 renderRadios();
 syncShareRadioButton();
 
-// Ouvre directement la radio reçue dans un lien partagé.
-// Le navigateur peut demander un appui sur Lecture avant de démarrer le son.
+// Ouvre directement le contenu précis reçu dans un lien de partage.
 try {
-  const sharedRadioParam = new URLSearchParams(window.location.search).get("radio");
-  if (sharedRadioParam) {
-    const sharedRadio = JSON.parse(sharedRadioParam);
-    if (sharedRadio && typeof sharedRadio.name === "string" &&
-        typeof sharedRadio.url === "string" &&
-        /^https?:\/\//i.test(sharedRadio.url)) {
+  const params = new URLSearchParams(window.location.search);
+  const radioParam = params.get("radio");
+  const trackParam = params.get("track");
+  const sharedParam = radioParam || trackParam;
+  if (sharedParam) {
+    const shared = JSON.parse(sharedParam);
+    if (shared && typeof shared.name === "string" &&
+        typeof shared.url === "string" && /^https?:\/\//i.test(shared.url)) {
+      const isRadio = !!radioParam;
       const sharedItem = {
-        title: sharedRadio.name,
-        artist: typeof sharedRadio.desc === "string" ? sharedRadio.desc : "Radio partagée sur UNSONMIS",
-        url: sharedRadio.url,
-        isLive: true
+        title: shared.name,
+        artist: typeof shared.desc === "string" ? shared.desc : "Partagé sur UNSONMIS",
+        url: shared.url,
+        source: shared.source || "",
+        isLive: isRadio
       };
       playFromQueue([sharedItem], 0);
-      switchTab("radios");
+      switchTab(isRadio ? "radios" : "tracks");
     }
   }
 } catch (error) {
-  console.warn("Lien de radio partagé invalide", error);
+  console.warn("Lien de contenu partagé invalide", error);
 }
 initAudius().then(() => searchTracks("tekno tribe acid"));
 </script>
