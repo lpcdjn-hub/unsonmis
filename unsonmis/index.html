@@ -923,6 +923,103 @@ header{padding:10px 12px 12px!important;background:linear-gradient(180deg,rgba(4
  .app-project-links>strong{font-size:.82rem!important}
  .app-project-link-list a{min-height:46px!important}
 }
+
+/* === UNSONMIS — rendu cible validé par Lauris === */
+/* Décor continu : mur de club, plafond cassé et sol lumineux */
+html,body{
+  background-color:#050508!important;
+  background-image:url("./assets/graffiti-wall.svg?v=4")!important;
+  background-position:center top!important;
+  background-size:cover!important;
+  background-attachment:fixed!important;
+  background-repeat:no-repeat!important;
+}
+body{background-image:url("./assets/graffiti-wall.svg?v=4")!important}
+body::before{opacity:0!important}
+header{
+  position:relative!important;top:auto!important;
+  padding:10px 12px 14px!important;
+  background:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.20))!important;
+  backdrop-filter:none!important;
+  border-bottom:3px solid #ff173b!important;
+}
+.brand-banner{
+  width:calc(100% - 8px)!important;
+  max-width:620px!important;
+  height:clamp(205px,38vw,290px)!important;
+  margin:0 auto 10px!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  overflow:hidden!important;border:3px solid #d5d5d5!important;border-radius:22px!important;
+  box-shadow:0 0 9px #fff,0 0 24px rgba(255,0,60,.58)!important;
+}
+.brand-banner img{
+  display:block!important;width:100%!important;height:100%!important;
+  object-fit:cover!important;object-position:center!important;
+}
+.tagline{
+  white-space:nowrap!important;
+  font-size:clamp(.82rem,3.8vw,1.55rem)!important;
+  line-height:1.2!important;letter-spacing:0!important;
+  margin:5px auto 0!important;color:#ffe500!important;
+  text-shadow:0 0 6px #ffcf00,0 0 15px rgba(255,200,0,.75)!important;
+}
+.founder-credit{
+  margin-top:8px!important;
+  font-size:clamp(.68rem,2.9vw,1.12rem)!important;
+  line-height:1.25!important;color:#fff!important;
+  text-shadow:0 2px 5px #000!important;
+}
+.founder-credit strong{color:#ff263e!important}
+.top-actions{
+  display:grid!important;grid-template-columns:1fr!important;
+  max-width:620px!important;margin:16px auto 0!important;gap:11px!important;
+}
+.top-actions .action-pill{
+  width:100%!important;min-height:clamp(54px,9vw,72px)!important;
+  padding:9px 14px!important;border-radius:36px!important;
+  background:rgba(0,0,0,.86)!important;
+  font-size:clamp(.88rem,3.8vw,1.35rem)!important;
+  text-shadow:0 2px 4px #000!important;
+}
+.top-actions .action-pill.primary{border:3px solid #ffe600!important;box-shadow:0 0 9px #ffe600,0 0 20px rgba(255,230,0,.5)!important}
+.top-actions .action-pill:not(.primary):not(.red){border:3px solid #fff!important;box-shadow:0 0 9px #fff,0 0 20px rgba(255,255,255,.5)!important}
+.top-actions .action-pill.red{border:3px solid #ff1838!important;box-shadow:0 0 9px #ff1838,0 0 20px rgba(255,0,40,.6)!important}
+.app-project-links{
+  display:block!important;max-width:680px!important;
+  margin:14px auto 16px!important;padding:15px!important;
+  background:rgba(0,8,2,.92)!important;border:3px solid #00f044!important;
+  border-radius:25px!important;box-shadow:0 0 12px #00f044,0 0 28px rgba(0,255,60,.55)!important;
+}
+.app-project-links>strong{
+  color:#fff!important;font-size:clamp(.88rem,3.7vw,1.35rem)!important;
+  text-shadow:0 0 10px #00ff50!important;
+}
+.app-project-link-list{grid-template-columns:1fr!important;gap:10px!important}
+.app-project-link-list a{
+  min-height:clamp(54px,9vw,76px)!important;padding:10px 17px!important;
+  flex-direction:row!important;justify-content:space-between!important;
+  background:linear-gradient(90deg,rgba(0,75,25,.97),rgba(0,135,40,.97))!important;
+  border:2px solid #20ff50!important;border-radius:17px!important;
+  box-shadow:0 0 8px #00ff4c,inset 0 0 14px rgba(0,255,70,.24)!important;
+  font-size:clamp(.9rem,3.7vw,1.3rem)!important;
+}
+.player-bar{
+  background:rgba(0,0,0,.97)!important;
+  border-top:4px solid #ff173b!important;
+  box-shadow:0 -5px 22px rgba(255,0,40,.58)!important;
+}
+@media(max-width:600px){
+  header{padding:8px 9px 12px!important}
+  .brand-banner{height:clamp(190px,57vw,245px)!important}
+  .tagline{font-size:clamp(.72rem,3.65vw,1.05rem)!important}
+  .founder-credit{font-size:clamp(.64rem,2.8vw,.9rem)!important}
+  .top-actions{margin-top:12px!important;gap:9px!important}
+  .top-actions .action-pill{min-height:54px!important;font-size:clamp(.82rem,3.8vw,1.08rem)!important}
+  .app-project-links{margin:12px 10px 14px!important;padding:12px!important}
+  .app-project-links>strong{font-size:.92rem!important}
+  .app-project-link-list a{min-height:55px!important;font-size:.95rem!important}
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
