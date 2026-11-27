@@ -928,12 +928,12 @@ let selectedRadioGenre = "all";
 
 
 // --- PARTAGE ET FAVORIS DES RADIOS ---
-let unsonmisRadioFavorites = [];
+let unsonmisRadioFavorites = []; let unsonmisSessionFavorites=[];
 try { unsonmisRadioFavorites = JSON.parse(localStorage.getItem("unsonmis_radio_favorites") || "[]"); } catch(e) { unsonmisRadioFavorites = []; }
 function saveRadioFavorites(){ try{localStorage.setItem("unsonmis_radio_favorites",JSON.stringify(unsonmisRadioFavorites));}catch(e){} }
 function radioIsFavorite(radio){return unsonmisRadioFavorites.some(x=>x.url===radio.url);}
 function updateRadioFavoriteCount(){
- const el=document.getElementById("favoriteCount"); if(el) el.textContent="("+unsonmisRadioFavorites.length+")";
+ const el=document.getElementById("favoriteCount"); if(el) el.textContent="("+(unsonmisRadioFavorites.length+unsonmisSessionFavorites.length)+")";
 }
 function addRadioActions(radio, container){
  const actions=document.createElement("div"); actions.className="radio-actions";
@@ -985,10 +985,10 @@ function addMusicActions(track, container, sourceName){
 }
 function renderRadioFavorites(){
  const list=document.getElementById("favoritesList");if(!list)return;
- list.innerHTML="";updateRadioFavoriteCount();
- document.getElementById("favoriteStatus").textContent=unsonmisRadioFavorites.length+" élément(s) enregistré(s)";
- if(!unsonmisRadioFavorites.length){list.textContent="Aucun favori. Appuie sur ☆ Favori sur une radio ou une musique.";return;}
- unsonmisRadioFavorites.forEach(item=>{
+ list.innerHTML="";updateRadioFavoriteCount();const allFavorites=unsonmisRadioFavorites.concat(unsonmisSessionFavorites);
+ document.getElementById("favoriteStatus").textContent=allFavorites.length+" élément(s) enregistré(s)";
+ if(!allFavorites.length){list.textContent="Aucun favori. Appuie sur ☆ Favori sur une radio ou une musique.";return;}
+ allFavorites.forEach(item=>{
   const isRadio=item.kind!=="music";
   const row=document.createElement("div");row.className="card-item";
   const meta=document.createElement("div");meta.className="item-meta";
@@ -998,7 +998,7 @@ function renderRadioFavorites(){
   const play=document.createElement("button");play.type="button";play.className="radio-action-btn";play.textContent="▶ Écouter";
   play.addEventListener("click",()=>playFromQueue([{title:item.name||item.title,artist:item.desc||item.artist||"",url:item.url,isLive:isRadio}],0));
   const remove=document.createElement("button");remove.type="button";remove.className="favorite-btn is-favorite";remove.textContent="★ Retirer";
-  remove.addEventListener("click",()=>{unsonmisRadioFavorites=unsonmisRadioFavorites.filter(x=>x.url!==item.url||x.kind!==item.kind);saveRadioFavorites();renderRadioFavorites();});
+  remove.addEventListener("click",()=>{unsonmisRadioFavorites=unsonmisRadioFavorites.filter(x=>x.url!==item.url||x.kind!==item.kind);unsonmisSessionFavorites=unsonmisSessionFavorites.filter(x=>x.url!==item.url||x.kind!==item.kind);saveRadioFavorites();renderRadioFavorites();});
   row.append(meta,play,remove);list.appendChild(row);
  });
 }
@@ -1209,7 +1209,7 @@ async function runGlobalMusicSearch(){
    const link=document.createElement("a");link.href="https://lrclib.net/search/"+encodeURIComponent(track.trackName||track.name||"");link.target="_blank";link.rel="noopener noreferrer";link.textContent="Voir les paroles / détails";link.className="item-sub";
    const play=document.createElement("button");play.type="button";play.className="action-pill";play.textContent="Chercher l’audio";
    play.addEventListener("click",()=>{document.getElementById("searchInput").value=(track.trackName||track.name||"")+" "+(track.artistName||"");switchTab("tracks");searchTracks(document.getElementById("searchInput").value);});
-   meta.append(title,artist,snippet,link);card.append(art,meta,play);list.appendChild(card);count++;
+   meta.append(title,artist,snippet,link);card.append(art,meta,play);addMusicActions({title:track.title,artist:track.artist,url:track.url},card,"Internet Archive");list.appendChild(card);count++;
   });
  }else addMessage("Recherche dans les paroles : service momentanément indisponible.");
  status.textContent=count+" résultat(s) · Audius + paroles indexées LRCLIB. Tous les morceaux n’ont pas de paroles disponibles.";
@@ -1260,7 +1260,7 @@ function renderLocalTracks() {
     badge.className = "badge";
     badge.textContent = "LOCAL";
     div.append(art, meta, badge);
-    const localFav=document.createElement("button");localFav.type="button";localFav.className="favorite-btn";localFav.textContent="☆ Favori";localFav.addEventListener("click",event=>{event.stopPropagation();alert("Les fichiers locaux restent sur cet appareil. Ajoute-les à tes favoris pendant cette session.");});div.appendChild(localFav);
+    const localFav=document.createElement("button");localFav.type="button";localFav.className="favorite-btn";const localIsFav=()=>unsonmisSessionFavorites.some(x=>x.url===track.url);const paintLocalFav=()=>{localFav.classList.toggle("is-favorite",localIsFav());localFav.textContent=localIsFav()?"★ Favori":"☆ Favori";};paintLocalFav();localFav.addEventListener("click",event=>{event.stopPropagation();if(localIsFav())unsonmisSessionFavorites=unsonmisSessionFavorites.filter(x=>x.url!==track.url);else unsonmisSessionFavorites.push({kind:"music",name:track.title,desc:track.artist,url:track.url,source:"Fichier local"});paintLocalFav();updateRadioFavoriteCount();});div.appendChild(localFav);
     div.onclick = () => playFromQueue(localTracks, idx);
     list.appendChild(div);
   });
