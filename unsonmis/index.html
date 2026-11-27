@@ -959,6 +959,7 @@ function addRadioActions(radio, container){
  });
  actions.append(share,fav); container.appendChild(actions);
 }
+window.addRadioActions = addRadioActions;
 function addMusicActions(track, container, sourceName){
  const item={name:track.title||"Musique",desc:track.artist||sourceName||"Musique",url:track.url,source:sourceName||track.source||""};
  if(!item.url || !/^https?:\/\//i.test(item.url)) return;
@@ -1801,8 +1802,8 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
 }
 </script>
 
-<script src="./external-platforms.js?v=20261126-archive-ccmixter-player2"></script>
-<script src="./world-radio.js?v=20261126-main-player"></script>
+<script src="./external-platforms.js?v=20261127-favorites-share"></script>
+<script src="./world-radio.js?v=20261127-share-fix"></script>
 <script>
 /* Navigation de secours indépendante du script principal */
 (function () {
