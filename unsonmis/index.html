@@ -554,6 +554,13 @@
     #radioList > .card-item { gap: 8px; padding: 10px; }
   }
   .hidden { display: none !important; }
+
+  .radio-action-btn,.favorite-btn{border:1px solid var(--border);background:#242424;color:#eee;border-radius:7px;padding:7px 9px;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap}
+  .radio-action-btn{border-color:#8b3030;color:#ffb1b1}
+  .favorite-btn.is-favorite{border-color:var(--yellow);color:var(--yellow)}
+  #tab-favorites{padding:10px}
+  .radio-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -587,6 +594,7 @@
   <button class="tab-btn" data-tab="local">💾 Mes Sons (<span id="localCount">0</span>)</button>
   <button class="tab-btn" data-tab="community">🎤 Communauté</button>
   <button class="tab-btn" id="memberTabButton" type="button" data-tab="member" onclick="switchTab('member')">👤 Espace membre</button>
+<button class="tab-btn" data-tab="favorites">⭐ MES FAVORIS <span id="favoriteCount">(0)</span></button>
 </div>
 
 <div class="container">
@@ -776,6 +784,12 @@
 
 </div>
 
+
+  <div id="tab-favorites" class="hidden" style="display:none">
+    <div class="section-info"><strong>⭐ Mes Favoris</strong><span id="favoriteStatus">Radios enregistrées sur cet appareil</span></div>
+    <div class="track-list" id="favoritesList"></div>
+  </div>
+
 <!-- PLAYER BAR -->
 <div class="player-bar">
   <div class="player-inner">
@@ -912,6 +926,59 @@ function readSavedRadios() {
 let radios = readSavedRadios();
 let selectedRadioGenre = "all";
 
+
+// --- PARTAGE ET FAVORIS DES RADIOS ---
+let unsonmisRadioFavorites = [];
+try { unsonmisRadioFavorites = JSON.parse(localStorage.getItem("unsonmis_radio_favorites") || "[]"); } catch(e) { unsonmisRadioFavorites = []; }
+function saveRadioFavorites(){ try{localStorage.setItem("unsonmis_radio_favorites",JSON.stringify(unsonmisRadioFavorites));}catch(e){} }
+function radioIsFavorite(radio){return unsonmisRadioFavorites.some(x=>x.url===radio.url);}
+function updateRadioFavoriteCount(){
+ const el=document.getElementById("favoriteCount"); if(el) el.textContent="("+unsonmisRadioFavorites.length+")";
+}
+function addRadioActions(radio, container){
+ const actions=document.createElement("div"); actions.className="radio-actions";
+ const share=document.createElement("button"); share.type="button"; share.className="radio-action-btn"; share.textContent="↗ Partager";
+ share.addEventListener("click",async event=>{
+  event.stopPropagation();
+  const target=new URL(window.location.pathname,window.location.origin);
+  target.searchParams.set("radio",JSON.stringify({name:radio.name,desc:radio.desc,url:radio.url}));
+  const data={title:"UNSONMIS — "+radio.name,text:"Écoute cette webradio sur UNSONMIS : "+radio.name,url:target.toString()};
+  try{
+   if(navigator.share) await navigator.share(data);
+   else if(navigator.clipboard && window.isSecureContext){await navigator.clipboard.writeText(target.toString());alert("Lien de cette radio copié !");}
+   else window.prompt("Copie le lien de cette radio :",target.toString());
+  }catch(err){if(err && err.name!=="AbortError") alert("Le partage n'a pas abouti. Réessaie.");}
+ });
+ const fav=document.createElement("button"); fav.type="button"; fav.className="favorite-btn"+(radioIsFavorite(radio)?" is-favorite":""); fav.textContent=radioIsFavorite(radio)?"★ Favori":"☆ Favori";
+ fav.addEventListener("click",event=>{
+  event.stopPropagation();
+  if(radioIsFavorite(radio)) unsonmisRadioFavorites=unsonmisRadioFavorites.filter(x=>x.url!==radio.url);
+  else unsonmisRadioFavorites.push({name:radio.name,desc:radio.desc,url:radio.url});
+  saveRadioFavorites(); fav.classList.toggle("is-favorite",radioIsFavorite(radio)); fav.textContent=radioIsFavorite(radio)?"★ Favori":"☆ Favori";
+  updateRadioFavoriteCount();
+ });
+ actions.append(share,fav); container.appendChild(actions);
+}
+function renderRadioFavorites(){
+ const list=document.getElementById("favoritesList"); if(!list)return;
+ list.innerHTML="";
+ updateRadioFavoriteCount();
+ document.getElementById("favoriteStatus").textContent=unsonmisRadioFavorites.length+" radio(s) enregistrée(s)";
+ if(!unsonmisRadioFavorites.length){list.textContent="Aucune radio favorite. Appuie sur ☆ Favori sur une radio.";return;}
+ unsonmisRadioFavorites.forEach(radio=>{
+  const row=document.createElement("div");row.className="card-item";
+  const meta=document.createElement("div");meta.className="item-meta";
+  const title=document.createElement("div");title.className="item-title";title.textContent=radio.name;
+  const desc=document.createElement("div");desc.className="item-sub";desc.textContent=radio.desc||"Webradio";
+  meta.append(title,desc);
+  const play=document.createElement("button");play.type="button";play.className="radio-action-btn";play.textContent="▶ Écouter";
+  play.addEventListener("click",()=>playFromQueue([{title:radio.name,artist:radio.desc,url:radio.url,isLive:true}],0));
+  const remove=document.createElement("button");remove.type="button";remove.className="favorite-btn is-favorite";remove.textContent="★ Retirer";
+  remove.addEventListener("click",()=>{unsonmisRadioFavorites=unsonmisRadioFavorites.filter(x=>x.url!==radio.url);saveRadioFavorites();renderRadioFavorites();});
+  row.append(meta,play,remove);list.appendChild(row);
+ });
+}
+
 function renderRadios() {
   const list = document.getElementById("radioList");
   const filtered = selectedRadioGenre === "all"
@@ -941,6 +1008,7 @@ function renderRadios() {
     badge.className = "badge live";
     badge.textContent = `LIVE • ${radio.genre.split('/')[0].trim()}`;
     div.append(art, meta, badge);
+    addRadioActions(radio, div);
     div.onclick = () => {
       const queue = filtered.map(r => ({
         title: r.name,
@@ -960,7 +1028,8 @@ document.querySelectorAll("#radioGenreChips .chip").forEach(btn => {
     document.querySelectorAll("#radioGenreChips .chip").forEach(c => c.classList.remove("active"));
     btn.classList.add("active");
     selectedRadioGenre = btn.dataset.rgenre;
-    renderRadios();
+    updateRadioFavoriteCount();
+renderRadios();
   };
 });
 
@@ -1391,10 +1460,11 @@ function switchTab(tabName) {
   document.querySelectorAll(".tab-btn").forEach(b => {
     b.classList.toggle("active", b.dataset.tab === tabName);
   });
-  ["radios","tracks","free","local","community","member"].forEach(name => {
+  ["radios","tracks","free","local","community","member","favorites"].forEach(name => {
     const panel = document.getElementById("tab-" + name);
     if (panel) { panel.classList.toggle("hidden", name !== tabName); panel.style.display = name === tabName ? "block" : "none"; }
   });
+  if (tabName === "favorites") renderRadioFavorites();
   if (tabName === "member" && typeof loadMemberDashboard === "function") {
     loadMemberDashboard().catch(error => {
       const status = document.getElementById("memberStatus");
