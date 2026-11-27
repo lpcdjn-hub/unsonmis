@@ -793,6 +793,113 @@ header{
  .container{padding:12px 10px 24px!important}
 }
 
+
+/* === UNSONMIS — scène rave immersive v3 === */
+html,body{
+  background:#050508 url("./assets/graffiti-wall.svg?v=3") center top/cover fixed no-repeat!important;
+}
+body{
+  background-image:url("./assets/graffiti-wall.svg?v=3")!important;
+  background-position:center top!important;
+  background-size:cover!important;
+  background-attachment:fixed!important;
+  background-color:#050508!important;
+}
+body::before{opacity:.025!important;mix-blend-mode:normal!important}
+header{
+  position:relative!important;top:auto!important;
+  background:linear-gradient(180deg,rgba(3,3,6,.16),rgba(3,3,6,.10))!important;
+  backdrop-filter:none!important;
+  border-bottom:3px solid #ff143f!important;
+  box-shadow:0 5px 25px rgba(255,0,50,.5)!important;
+}
+.brand-banner{
+  max-width:620px!important;
+  width:calc(100% - 8px)!important;
+  border:3px solid #c9c9c9!important;
+  border-radius:20px!important;
+  box-shadow:0 0 8px #fff,0 0 22px rgba(255,0,60,.55)!important;
+}
+.tagline{
+  color:#ffe500!important;
+  text-shadow:0 0 5px #ffcf00,0 0 14px rgba(255,200,0,.7)!important;
+  font-size:clamp(1rem,4.2vw,1.5rem)!important;
+}
+.founder-credit{color:#fff!important;text-shadow:0 2px 5px #000!important}
+.founder-credit strong{color:#ff253f!important}
+.top-actions{max-width:620px!important;gap:12px!important}
+.top-actions .action-pill{
+  min-height:58px!important;
+  border-radius:32px!important;
+  background:rgba(0,0,0,.82)!important;
+  font-size:clamp(.95rem,3.8vw,1.25rem)!important;
+  text-shadow:0 2px 4px #000;
+}
+.top-actions .action-pill.primary{border:3px solid #ffe600!important;box-shadow:0 0 8px #ffe600,0 0 18px rgba(255,230,0,.5)!important}
+.top-actions .action-pill:not(.primary):not(.red){border:3px solid #fff!important;box-shadow:0 0 8px #fff,0 0 18px rgba(255,255,255,.45)!important}
+.top-actions .action-pill.red{border:3px solid #ff1838!important;box-shadow:0 0 8px #ff1838,0 0 18px rgba(255,0,40,.55)!important}
+.app-project-links{
+  background:rgba(0,8,2,.88)!important;
+  border:3px solid #00f044!important;
+  border-radius:24px!important;
+  box-shadow:0 0 12px #00f044,0 0 28px rgba(0,255,60,.55)!important;
+}
+.app-project-links>strong{color:#fff!important;text-shadow:0 0 10px #00ff50!important}
+.app-project-link-list a{
+  background:linear-gradient(90deg,rgba(0,75,25,.96),rgba(0,135,40,.96))!important;
+  border:2px solid #20ff50!important;
+  box-shadow:0 0 8px #00ff4c, inset 0 0 14px rgba(0,255,70,.24)!important;
+}
+.container{
+  background:rgba(2,2,6,.14)!important;
+  border:0!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+}
+.tabs{margin-top:16px!important}
+.tab-btn{
+  background:rgba(8,8,12,.9)!important;
+  border:2px solid rgba(220,220,220,.25)!important;
+  box-shadow:0 0 12px rgba(0,0,0,.65)!important;
+  color:#eee!important;
+}
+.tab-btn.active{
+  background:linear-gradient(135deg,#ed172e,#92051b)!important;
+  border:2px solid #ff3447!important;
+  box-shadow:0 0 12px #ff1838!important;
+}
+.player-bar{
+  background:rgba(0,0,0,.94)!important;
+  border-top:4px solid #ff173b!important;
+  box-shadow:0 -4px 20px rgba(255,0,40,.5)!important;
+}
+#visualizer{
+  background:rgba(0,0,0,.85)!important;
+  border:3px solid #ff1d40!important;
+  box-shadow:0 0 10px #ff1d40!important;
+}
+.play-main{
+  width:76px!important;height:76px!important;
+  background:radial-gradient(circle,#ff3b4e,#bd001c)!important;
+  border:3px solid #ff8791!important;
+  box-shadow:0 0 10px #ff1238,0 0 25px rgba(255,0,50,.75)!important;
+}
+#shuffleBtn,#loopBtn{
+  background:linear-gradient(135deg,#fff04a,#f2a900)!important;
+  color:#171000!important;
+  box-shadow:0 0 12px rgba(255,210,0,.75)!important;
+}
+.community-panel,.member-panel,.card-item,.custom-radio-form,.music-tv-player-box,.world-radio-panel{
+  background:rgba(10,9,15,.9)!important;
+}
+@media(max-width:600px){
+ header{padding:10px 10px 15px!important}
+ .brand-banner{max-width:620px!important}
+ .top-actions .action-pill{min-height:54px!important}
+ .container{padding:12px 10px 24px!important}
+ .play-main{width:68px!important;height:68px!important}
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
