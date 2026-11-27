@@ -761,6 +761,38 @@ body.focus-mode{padding-bottom:18px!important}
   .app-project-links{margin-left:10px!important;margin-right:10px!important}
 }
 
+
+/* === UNSONMIS — décor de scène graffiti immersif === */
+html,body{background:#050508 url("./assets/graffiti-wall.svg?v=2") center top/cover fixed no-repeat!important}
+body{background-image:url("./assets/graffiti-wall.svg?v=2")!important;background-position:center top!important;background-size:cover!important;background-attachment:fixed!important}
+body::before{opacity:.08!important}
+header{
+  background:linear-gradient(180deg,rgba(3,3,7,.28),rgba(3,3,7,.12))!important;
+  backdrop-filter:none!important;
+  border-bottom:3px solid #ff163d!important;
+  box-shadow:0 5px 24px rgba(255,0,50,.38)!important;
+}
+.container{
+  background:rgba(3,3,7,.16)!important;
+  border-left:0!important;border-right:0!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+}
+.top-actions{max-width:620px!important}
+.top-actions .action-pill{background:rgba(0,0,0,.82)!important}
+.app-project-links{background:rgba(0,10,3,.9)!important}
+.player-bar{background:rgba(2,2,5,.96)!important;backdrop-filter:blur(8px)!important}
+#tab-radios .custom-radio-form,#tab-tracks .community-panel,#tab-free .community-panel,
+.community-panel,.member-panel,.card-item,.custom-radio-form,.music-tv-player-box,
+.world-radio-panel,#tab-cinema .cine-head,#tab-music-tv .music-tv-head{
+  background:rgba(12,10,16,.91)!important;
+}
+@media(max-width:600px){
+ header{padding:9px 10px 13px!important}
+ .brand-banner{width:calc(100% - 12px)!important;max-width:620px!important}
+ .container{padding:12px 10px 24px!important}
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
