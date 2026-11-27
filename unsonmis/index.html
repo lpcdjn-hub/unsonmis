@@ -591,6 +591,24 @@
 #tab-cinema .cine-player{width:100%;aspect-ratio:16/9;border:0;border-radius:10px;background:#000}
 @media(max-width:480px){#tab-cinema .cine-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#tab-cinema .cine-card img{height:155px}}
 
+
+/* Chaînes musicales intégrées */
+.music-tv-panel{width:100%;min-width:0}
+.music-tv-head{padding:18px;border:1px solid #3a3030;border-radius:14px;background:linear-gradient(120deg,#241414,#101010);margin-bottom:14px}
+.music-tv-head h2{color:var(--yellow);font-size:1.3rem;margin-bottom:7px}
+.music-tv-head p{color:var(--muted);font-size:.88rem;line-height:1.5}
+.music-tv-search{display:flex;gap:8px;margin:12px 0}
+.music-tv-search input{flex:1;min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:12px}
+.music-tv-search button{background:var(--red);color:white;border:0;border-radius:8px;padding:0 15px;font-weight:800}
+.music-tv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.music-tv-card{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.music-tv-card h3{font-size:.92rem;line-height:1.3;overflow-wrap:anywhere}
+.music-tv-card p{font-size:.76rem;color:var(--muted)}
+.music-tv-card button{margin-top:auto;background:var(--red);color:#fff;border:0;border-radius:8px;padding:9px;font-weight:800}
+.music-tv-player-box{margin-top:16px;background:#111;border:1px solid var(--border);border-radius:12px;padding:12px}
+.music-tv-player-box video{display:block;width:100%;max-height:62vh;aspect-ratio:16/9;background:#000;border-radius:8px}
+@media(max-width:480px){.music-tv-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.music-tv-card{padding:9px}}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -634,6 +652,7 @@
   <button class="tab-btn" id="memberTabButton" type="button" data-tab="member" onclick="switchTab('member')">👤 Espace membre</button>
 <button class="tab-btn" data-tab="favorites">⭐ MES FAVORIS <span id="favoriteCount">(0)</span></button>
 <button class="tab-btn" data-tab="cinema">🎬 CINÉMA</button>
+  <button class="tab-btn" data-tab="music-tv">📺 CHAÎNES MUSICALES</button>
 </div>
 
 <div class="container">
@@ -820,6 +839,26 @@
       <button id="adminRefreshStats" type="button">Actualiser les indicateurs et les membres</button>
     </section>
   </div>
+
+
+  <section id="tab-music-tv" class="hidden music-tv-panel">
+    <div class="music-tv-head">
+      <h2>📺 Les chaînes musicales du monde</h2>
+      <p>Découvre des chaînes musicales en direct : clips, concerts, musique du monde et radios filmées. Les flux sont fournis par des répertoires publics et peuvent être indisponibles selon le pays ou le diffuseur.</p>
+    </div>
+    <div class="music-tv-search">
+      <input id="musicTvSearch" type="search" placeholder="Rechercher une chaîne, un pays ou une langue…">
+      <button id="musicTvSearchBtn" type="button">Rechercher</button>
+    </div>
+    <div class="chips" id="musicTvCountries"><button class="chip active" data-mtv-country="all">Tous les pays</button></div>
+    <p class="cine-status" id="musicTvStatus" aria-live="polite">Chargement des chaînes musicales…</p>
+    <div class="music-tv-grid" id="musicTvResults"></div>
+    <section class="music-tv-player-box" id="musicTvPlayerBox" hidden>
+      <div class="section-info"><strong id="musicTvNow">Lecture en direct</strong><button type="button" id="musicTvClose">✕ Fermer</button></div>
+      <video id="musicTvVideo" controls playsinline preload="none"></video>
+      <p class="cine-status">La disponibilité et les droits de diffusion dépendent de chaque chaîne. UNSONMIS ne stocke ni ne rediffuse les flux.</p>
+    </section>
+  </section>
 
 </div>
 
@@ -1565,7 +1604,7 @@ function switchTab(tabName) {
   document.querySelectorAll(".tab-btn").forEach(b => {
     b.classList.toggle("active", b.dataset.tab === tabName);
   });
-  ["radios","tracks","free","local","community","member","favorites","cinema"].forEach(name => {
+  ["radios","tracks","free","local","community","member","favorites","cinema","music-tv"].forEach(name => {
     const panel = document.getElementById("tab-" + name);
     if (panel) { panel.classList.toggle("hidden", name !== tabName); panel.style.display = name === tabName ? "block" : "none"; }
   });
@@ -1954,6 +1993,57 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
  input.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(load,450);});
  root.querySelector('#cinePlayerClose').addEventListener('click',()=>{frame.src='';player.hidden=true;});
  setMode('films');
+})();
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
+<script>
+/* Chaînes musicales : catalogue public IPTV-org, filtré sur la catégorie Music */
+(function(){
+ const root=document.getElementById('tab-music-tv');if(!root)return;
+ const input=root.querySelector('#musicTvSearch'),search=root.querySelector('#musicTvSearchBtn'),status=root.querySelector('#musicTvStatus'),results=root.querySelector('#musicTvResults'),countries=root.querySelector('#musicTvCountries');
+ const box=root.querySelector('#musicTvPlayerBox'),video=root.querySelector('#musicTvVideo'),now=root.querySelector('#musicTvNow');
+ let all=[],country='all',hls=null;
+ const safe=v=>String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ function stop(){if(hls){hls.destroy();hls=null;}video.pause();video.removeAttribute('src');video.load();box.hidden=true;}
+ function play(item){
+  stop();now.textContent='🔴 '+item.name;box.hidden=false;
+  if(/\.m3u8($|\?)/i.test(item.url)&&window.Hls&&Hls.isSupported()){
+   hls=new Hls();hls.loadSource(item.url);hls.attachMedia(video);hls.on(Hls.Events.MANIFEST_PARSED,()=>video.play().catch(()=>{}));
+  }else if(video.canPlayType('application/vnd.apple.mpegurl')||!(/\.m3u8($|\?)/i.test(item.url))){
+   video.src=item.url;video.play().catch(()=>{});
+  }else{
+   status.textContent='Ce flux HLS ne peut pas être lu sur cet appareil.';
+  }
+  box.scrollIntoView({behavior:'smooth',block:'center'});
+ }
+ function render(){
+  const q=input.value.trim().toLocaleLowerCase();
+  const items=all.filter(x=>(country==='all'||x.country===country)&&(!q||[x.name,x.countryName,x.languages].join(' ').toLocaleLowerCase().includes(q))).slice(0,120);
+  results.innerHTML=items.map((x,i)=>'<article class="music-tv-card"><div class="art-box">🎶</div><h3>'+safe(x.name)+'</h3><p>'+safe(x.countryName||'International')+' · '+safe(x.languages||'Langue non précisée')+'</p><button type="button" data-mtv="'+i+'">▶ Regarder</button></article>').join('')||'<p class="community-note">Aucune chaîne trouvée avec ce filtre.</p>';
+  results.querySelectorAll('[data-mtv]').forEach((b,i)=>b.addEventListener('click',()=>play(items[i])));
+  status.textContent=items.length+' chaîne(s) musicale(s) affichée(s) · Répertoire IPTV-org. Les flux peuvent être temporairement hors ligne.';
+ }
+ async function load(){
+  status.textContent='Chargement du catalogue mondial…';
+  try{
+   const [a,b]=await Promise.all([fetch('https://iptv-org.github.io/api/channels.json'),fetch('https://iptv-org.github.io/api/streams.json')]);
+   if(!a.ok||!b.ok)throw Error('Catalogue inaccessible');
+   const [channels,streams]=await Promise.all([a.json(),b.json()]);
+   const byId=new Map();
+   streams.forEach(x=>{if(x.channel&&x.url&&/^https?:\/\//i.test(x.url)&&!(x.labels||[]).includes('Geo-blocked')){if(!byId.has(x.channel))byId.set(x.channel,[]);byId.get(x.channel).push(x.url);}});
+   all=channels.filter(c=>!c.is_nsfw&&!c.closed&&(c.categories||[]).some(v=>String(v).toLowerCase()==='music')&&byId.has(c.id)).map(c=>({name:c.name,country:c.country,countryName:c.country||'International',languages:(c.languages||[]).join(', '),url:byId.get(c.id)[0]})).sort((x,y)=>x.name.localeCompare(y.name));
+   const unique=[...new Set(all.map(x=>x.country).filter(Boolean))].sort();
+   countries.innerHTML='<button class="chip active" data-mtv-country="all">Tous les pays</button>'+unique.map(c=>'<button class="chip" data-mtv-country="'+safe(c)+'">'+safe(c)+'</button>').join('');
+   countries.querySelectorAll('[data-mtv-country]').forEach(b=>b.addEventListener('click',()=>{country=b.dataset.mtvCountry;countries.querySelectorAll('.chip').forEach(x=>x.classList.toggle('active',x===b));render();}));
+   render();
+   if(!all.length)status.textContent='Aucune chaîne musicale avec flux public trouvée pour le moment.';
+  }catch(e){status.textContent='Le catalogue des chaînes musicales est momentanément indisponible. Réessaie plus tard.';}
+ }
+ search.addEventListener('click',render);input.addEventListener('keydown',e=>{if(e.key==='Enter')render();});input.addEventListener('input',render);
+ root.querySelector('#musicTvClose').addEventListener('click',stop);
+ load();
 })();
 </script>
 
