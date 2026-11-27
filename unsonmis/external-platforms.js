@@ -112,6 +112,7 @@
     link.textContent = "Voir la source et ses conditions";
     link.style.color = "var(--yellow)";
     card.append(link);
+    if (preview && typeof window.addMusicActions === "function") window.addMusicActions({title:title||"Titre sans nom",artist:artist||"Artiste non renseigné",url:preview},card,source);
     return card;
   }
 
