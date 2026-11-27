@@ -351,6 +351,23 @@
     text-overflow: ellipsis;
   }
 
+  .share-radio-btn {
+    flex: 0 0 auto;
+    border: 1px solid #d92525;
+    border-radius: 8px;
+    background: #241010;
+    color: #fff;
+    padding: 8px 10px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .share-radio-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
   /* Equalizer Canvas */
   #visualizer {
     width: 110px;
@@ -555,6 +572,7 @@
         <div class="np-title" id="npTitle">Prêt à diffuser le son libre</div>
         <div class="np-artist" id="npArtist">Choisissez une webradio ou un morceau</div>
       </div>
+      <button class="share-radio-btn" id="shareRadioBtn" type="button" disabled title="Choisissez une webradio pour la partager">↗ Partager</button>
       <canvas id="visualizer" width="220" height="64"></canvas>
     </div>
 
@@ -970,6 +988,54 @@ const playPauseButton = document.getElementById("playPauseBtn");
 let confirmedPlaying = false;
 let playAttemptTimer = null;
 
+const shareRadioButton = document.getElementById("shareRadioBtn");
+
+function syncShareRadioButton() {
+  const item = currentQueue[currentIndex];
+  const canShare = !!(item && item.isLive);
+  shareRadioButton.disabled = !canShare;
+  shareRadioButton.title = canShare
+    ? "Partager la webradio actuellement sélectionnée"
+    : "Choisissez une webradio pour la partager";
+}
+
+async function shareCurrentRadio() {
+  const item = currentQueue[currentIndex];
+  if (!item || !item.isLive) {
+    alert("Choisissez d'abord une webradio à partager.");
+    return;
+  }
+
+  const shareUrl = new URL(window.location.href);
+  shareUrl.searchParams.set("radio", JSON.stringify({
+    name: item.title,
+    desc: item.artist,
+    url: item.url
+  }));
+  const shareData = {
+    title: "UNSONMIS — " + item.title,
+    text: "Écoute cette radio sur UNSONMIS : " + item.title,
+    url: shareUrl.toString()
+  };
+
+  try {
+    if (navigator.share) {
+      await navigator.share(shareData);
+    } else if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(shareUrl.toString());
+      alert("Lien de la radio copié. Tu peux maintenant le partager !");
+    } else {
+      window.prompt("Copie le lien de cette radio :", shareUrl.toString());
+    }
+  } catch (error) {
+    if (error && error.name !== "AbortError") {
+      alert("Le partage n'a pas abouti. Réessaie ou copie le lien.");
+    }
+  }
+}
+
+shareRadioButton.addEventListener("click", shareCurrentRadio);
+
 function syncPlaybackButton() {
   playPauseButton.textContent = confirmedPlaying ? "⏸" : "▶";
   playPauseButton.setAttribute("aria-label", confirmedPlaying ? "Mettre en pause" : "Reprendre la lecture");
@@ -1057,6 +1123,7 @@ function playFromQueue(queue, index) {
 
   renderRadios();
   if (localTracks.length > 0) renderLocalTracks();
+  syncShareRadioButton();
 }
 
 playPauseButton.onclick = async () => {
@@ -1222,6 +1289,30 @@ document.getElementById("closePwaModal").onclick = () => {
 
 // --- INIT ---
 renderRadios();
+syncShareRadioButton();
+
+// Ouvre directement la radio reçue dans un lien partagé.
+// Le navigateur peut demander un appui sur Lecture avant de démarrer le son.
+try {
+  const sharedRadioParam = new URLSearchParams(window.location.search).get("radio");
+  if (sharedRadioParam) {
+    const sharedRadio = JSON.parse(sharedRadioParam);
+    if (sharedRadio && typeof sharedRadio.name === "string" &&
+        typeof sharedRadio.url === "string" &&
+        /^https?:\/\//i.test(sharedRadio.url)) {
+      const sharedItem = {
+        title: sharedRadio.name,
+        artist: typeof sharedRadio.desc === "string" ? sharedRadio.desc : "Radio partagée sur UNSONMIS",
+        url: sharedRadio.url,
+        isLive: true
+      };
+      playFromQueue([sharedItem], 0);
+      switchTab("radios");
+    }
+  }
+} catch (error) {
+  console.warn("Lien de radio partagé invalide", error);
+}
 initAudius().then(() => searchTracks("tekno tribe acid"));
 </script>
 </body>
