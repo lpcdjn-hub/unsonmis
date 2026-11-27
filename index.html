@@ -472,7 +472,7 @@
   .card-item .item-title { overflow-wrap:anywhere; }
 
   .hidden { display: none !important; }
-</style>
+.cross-promo{max-width:900px;margin:18px auto 0;padding:16px;display:flex;align-items:center;gap:14px;text-align:left;background:linear-gradient(110deg,#211b1b,#171717);border:1px solid #6d3030;border-radius:14px}.cross-promo-icon{width:52px;height:52px;flex:none;display:grid;place-items:center;border-radius:13px;background:linear-gradient(135deg,#d92525,#7f1717);font-size:26px}.cross-promo-text{flex:1;min-width:0}.cross-promo-text>span{color:#f2b705;font-size:.68rem;font-weight:850;letter-spacing:.15em}.cross-promo-text h2{font-size:1rem;margin:3px 0 5px}.cross-promo-text p{font-size:.78rem;line-height:1.5;color:#bbb;margin:0}.cross-promo-actions{display:flex;flex-direction:column;gap:7px;min-width:165px}.cross-promo-actions a,.cross-promo-actions button{display:block;text-align:center;text-decoration:none;border:1px solid #d92525;border-radius:20px;padding:8px 11px;background:#d92525;color:#fff;font:inherit;font-size:.78rem;font-weight:800;cursor:pointer}.cross-promo-actions button{background:#252525;border-color:#555;color:#f2b705}@media(max-width:650px){.cross-promo{flex-wrap:wrap}.cross-promo-text{flex:1 1 calc(100% - 68px)}.cross-promo-actions{width:100%;flex-direction:row;flex-wrap:wrap}.cross-promo-actions>*{flex:1;min-width:145px}}\n</style>
 </head>
 <body>
 
@@ -485,7 +485,7 @@
     <input type="file" id="localFilesInput" accept="audio/*" multiple class="hidden">
     <button class="action-pill" id="installPwaBtn">📲 Installer l'appli (PWA)</button>
   </div>
-</header>
+</header>\n<section class="cross-promo" aria-label="Découvrir CinéLibre"><div class="cross-promo-icon">🎬</div><div class="cross-promo-text"><span>À DÉCOUVRIR AUSSI</span><h2>CinéLibre — films, séries et chaînes</h2><p>Pour rester dans l’esprit du gratuit, découvre CinéLibre : un projet indépendant qui rassemble des films du domaine public ou sous licences Creative Commons, des fiches de séries et des chaînes gratuites accessibles selon les diffuseurs et les pays. Les contenus sont lus ici quand leur source autorise l’intégration.</p></div><div class="cross-promo-actions"><a href="https://lpcdjn-hub.github.io/cinelibre/" target="_blank" rel="noopener noreferrer">Découvrir CinéLibre ↗</a><button type="button" id="shareCineLibre">↗ Partager CinéLibre</button></div></section>
 
 <div class="tabs">
   <button class="tab-btn active" data-tab="radios">📻 Webradios (Tous styles)</button>
@@ -1392,6 +1392,6 @@ try {
   console.warn("Lien de contenu partagé invalide", error);
 }
 initAudius().then(() => searchTracks("tekno tribe acid"));
-</script>
+\ndocument.getElementById('shareCineLibre')?.addEventListener('click',async()=>{const data={title:'CinéLibre — Films, séries et chaînes gratuites',text:'Découvre CinéLibre : un projet indépendant pour explorer des films du domaine public ou sous licences Creative Commons, des fiches de séries et des chaînes gratuites. La lecture est intégrée quand les diffuseurs l’autorisent. Disponibilité selon les pays et les sources.',url:'https://lpcdjn-hub.github.io/cinelibre/'};try{if(navigator.share)await navigator.share(data);else if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(data.text+' '+data.url);alert('Présentation et lien CinéLibre copiés !');}else prompt('Copie ce texte et ce lien :',data.text+' '+data.url);}catch(e){if(e.name!=='AbortError')alert('Le partage n’a pas pu être ouvert.');}});\n</script>
 </body>
 </html>
