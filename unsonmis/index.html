@@ -559,7 +559,7 @@
   .radio-action-btn{border-color:#8b3030;color:#ffb1b1}
   .favorite-btn.is-favorite{border-color:var(--yellow);color:var(--yellow)}
   #tab-favorites{padding:10px}
-  .radio-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .radio-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;flex-shrink:0}.radio-actions button{min-height:34px;display:inline-flex;align-items:center;justify-content:center;position:relative;z-index:2}
 
 </style>
 
@@ -959,22 +959,46 @@ function addRadioActions(radio, container){
  });
  actions.append(share,fav); container.appendChild(actions);
 }
+function addMusicActions(track, container, sourceName){
+ const item={name:track.title||"Musique",desc:track.artist||sourceName||"Musique",url:track.url,source:sourceName||track.source||""};
+ if(!item.url || !/^https?:\/\//i.test(item.url)) return;
+ const actions=document.createElement("div");actions.className="radio-actions";
+ const share=document.createElement("button");share.type="button";share.className="radio-action-btn";share.textContent="↗ Partager";
+ share.addEventListener("click",async event=>{
+  event.stopPropagation();
+  const target=new URL(window.location.pathname,window.location.origin);
+  target.searchParams.set("track",JSON.stringify({name:item.name,desc:item.desc,url:item.url,source:item.source}));
+  const data={title:"UNSONMIS — "+item.name,text:"Découvre ce morceau sur UNSONMIS : "+item.name,url:target.toString()};
+  try{if(navigator.share)await navigator.share(data);else if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(target.toString());alert("Lien du morceau copié !");}else window.prompt("Copie le lien du morceau :",target.toString());}
+  catch(err){if(err&&err.name!=="AbortError")alert("Le partage n'a pas abouti. Réessaie.");}
+ });
+ const key="music|"+item.url;
+ const isFav=()=>unsonmisRadioFavorites.some(x=>x.kind==="music"&&x.url===item.url);
+ const fav=document.createElement("button");fav.type="button";fav.className="favorite-btn"+(isFav()?" is-favorite":"");fav.textContent=isFav()?"★ Favori":"☆ Favori";
+ fav.addEventListener("click",event=>{
+  event.stopPropagation();
+  if(isFav())unsonmisRadioFavorites=unsonmisRadioFavorites.filter(x=>!(x.kind==="music"&&x.url===item.url));
+  else unsonmisRadioFavorites.push({kind:"music",name:item.name,desc:item.desc,url:item.url,source:item.source});
+  saveRadioFavorites();fav.classList.toggle("is-favorite",isFav());fav.textContent=isFav()?"★ Favori":"☆ Favori";updateRadioFavoriteCount();
+ });
+ actions.append(share,fav);container.appendChild(actions);
+}
 function renderRadioFavorites(){
- const list=document.getElementById("favoritesList"); if(!list)return;
- list.innerHTML="";
- updateRadioFavoriteCount();
- document.getElementById("favoriteStatus").textContent=unsonmisRadioFavorites.length+" radio(s) enregistrée(s)";
- if(!unsonmisRadioFavorites.length){list.textContent="Aucune radio favorite. Appuie sur ☆ Favori sur une radio.";return;}
- unsonmisRadioFavorites.forEach(radio=>{
+ const list=document.getElementById("favoritesList");if(!list)return;
+ list.innerHTML="";updateRadioFavoriteCount();
+ document.getElementById("favoriteStatus").textContent=unsonmisRadioFavorites.length+" élément(s) enregistré(s)";
+ if(!unsonmisRadioFavorites.length){list.textContent="Aucun favori. Appuie sur ☆ Favori sur une radio ou une musique.";return;}
+ unsonmisRadioFavorites.forEach(item=>{
+  const isRadio=item.kind!=="music";
   const row=document.createElement("div");row.className="card-item";
   const meta=document.createElement("div");meta.className="item-meta";
-  const title=document.createElement("div");title.className="item-title";title.textContent=radio.name;
-  const desc=document.createElement("div");desc.className="item-sub";desc.textContent=radio.desc||"Webradio";
+  const title=document.createElement("div");title.className="item-title";title.textContent=item.name||item.title||"Sans titre";
+  const desc=document.createElement("div");desc.className="item-sub";desc.textContent=(item.desc||item.artist||"")+(item.source?" · "+item.source:"");
   meta.append(title,desc);
   const play=document.createElement("button");play.type="button";play.className="radio-action-btn";play.textContent="▶ Écouter";
-  play.addEventListener("click",()=>playFromQueue([{title:radio.name,artist:radio.desc,url:radio.url,isLive:true}],0));
+  play.addEventListener("click",()=>playFromQueue([{title:item.name||item.title,artist:item.desc||item.artist||"",url:item.url,isLive:isRadio}],0));
   const remove=document.createElement("button");remove.type="button";remove.className="favorite-btn is-favorite";remove.textContent="★ Retirer";
-  remove.addEventListener("click",()=>{unsonmisRadioFavorites=unsonmisRadioFavorites.filter(x=>x.url!==radio.url);saveRadioFavorites();renderRadioFavorites();});
+  remove.addEventListener("click",()=>{unsonmisRadioFavorites=unsonmisRadioFavorites.filter(x=>x.url!==item.url||x.kind!==item.kind);saveRadioFavorites();renderRadioFavorites();});
   row.append(meta,play,remove);list.appendChild(row);
  });
 }
@@ -1121,6 +1145,7 @@ async function searchTracks(query) {
       badge.className = "badge";
       badge.textContent = "AUDIUS";
       div.append(art, meta, badge);
+      addMusicActions(track, div, "Audius");
       div.onclick = () => playFromQueue(queue, idx);
       list.appendChild(div);
     });
@@ -1167,7 +1192,7 @@ async function runGlobalMusicSearch(){
    meta.append(title,artist,source);
    const play=document.createElement("button");play.type="button";play.className="action-pill primary";play.textContent="▶ Écouter";
    play.addEventListener("click",()=>playFromQueue([{title:t.title,artist:(t.user&&t.user.name)||"Audius",url:audiusHost+"/v1/tracks/"+t.id+"/stream?app_name=UNSONMIS",isLive:false}],0));
-   card.append(art,meta,play);list.appendChild(card);count++;
+   card.append(art,meta,play);addMusicActions({title:t.title,artist:(t.user&&t.user.name)||"Audius",url:audiusHost+"/v1/tracks/"+t.id+"/stream?app_name=UNSONMIS"},card,"Audius");list.appendChild(card);count++;
   });
  }else addMessage("Audius : recherche momentanément indisponible.");
  if(tasks[1].status==="fulfilled"){
@@ -1235,6 +1260,7 @@ function renderLocalTracks() {
     badge.className = "badge";
     badge.textContent = "LOCAL";
     div.append(art, meta, badge);
+    const localFav=document.createElement("button");localFav.type="button";localFav.className="favorite-btn";localFav.textContent="☆ Favori";localFav.addEventListener("click",event=>{event.stopPropagation();alert("Les fichiers locaux restent sur cet appareil. Ajoute-les à tes favoris pendant cette session.");});div.appendChild(localFav);
     div.onclick = () => playFromQueue(localTracks, idx);
     list.appendChild(div);
   });
