@@ -1480,6 +1480,37 @@ function playFromQueue(queue, index) {
 
 window.playFromQueue = playFromQueue;
 
+// Commandes multimédias Android : écran verrouillé, casque et notification.
+function updateUnsonmisMediaSession(item) {
+  if (!("mediaSession" in navigator) || !item) return;
+  try {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: item.title || "UNSONMIS",
+      artist: item.artist || "UNSONMIS — En direct",
+      album: "UNSONMIS",
+      artwork: [
+        { src: "./icons/icon-192.png", sizes: "192x192", type: "image/png" },
+        { src: "./icons/icon-512.png", sizes: "512x512", type: "image/png" }
+      ]
+    });
+    navigator.mediaSession.playbackState = "playing";
+    navigator.mediaSession.setActionHandler("play", () => requestAudioPlay());
+    navigator.mediaSession.setActionHandler("pause", () => audio.pause());
+    navigator.mediaSession.setActionHandler("previoustrack", () => document.getElementById("prevBtn").click());
+    navigator.mediaSession.setActionHandler("nexttrack", () => document.getElementById("nextBtn").click());
+  } catch (error) {
+    console.warn("UNSONMIS : commandes multimédias indisponibles", error);
+  }
+}
+if ("mediaSession" in navigator) {
+  audio.addEventListener("playing", () => {
+    const item = currentQueue[currentIndex];
+    if (item) updateUnsonmisMediaSession(item);
+  });
+  audio.addEventListener("pause", () => { try { navigator.mediaSession.playbackState = "paused"; } catch (_) {} });
+  audio.addEventListener("ended", () => { try { navigator.mediaSession.playbackState = "none"; } catch (_) {} });
+}
+
 playPauseButton.onclick = async () => {
   if (!audio.src) {
     document.getElementById("npTitle").textContent = "Aucune radio sélectionnée";
