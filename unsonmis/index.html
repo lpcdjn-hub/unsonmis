@@ -2037,9 +2037,19 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
  const box=root.querySelector('#musicTvPlayerBox'),video=root.querySelector('#musicTvVideo'),now=root.querySelector('#musicTvNow');
  let all=[],country='all',hls=null;
  const safe=v=>String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- function stop(){if(hls){hls.destroy();hls=null;}video.pause();video.removeAttribute('src');video.load();box.hidden=true;}
+ function stop(){if(hls){hls.destroy();hls=null;}video.pause();video.removeAttribute('src');video.load();box.hidden=true;if("mediaSession" in navigator){try{navigator.mediaSession.playbackState="none";navigator.mediaSession.metadata=null;navigator.mediaSession.setActionHandler("play",null);navigator.mediaSession.setActionHandler("pause",null);}catch(e){}}}
  function play(item){
   stop();now.textContent='🔴 '+item.name;box.hidden=false;
+  if("mediaSession" in navigator){
+   try{
+    navigator.mediaSession.metadata=new MediaMetadata({title:item.name,artist:"Chaîne musicale en direct",album:"UNSONMIS",artwork:[{src:"./icons/icon-192.png",sizes:"192x192",type:"image/png"}]});
+    navigator.mediaSession.playbackState="playing";
+    navigator.mediaSession.setActionHandler("play",()=>video.play().catch(()=>{}));
+    navigator.mediaSession.setActionHandler("pause",()=>video.pause());
+   }catch(e){console.warn("Commandes écran verrouillé indisponibles",e);}
+  }
+  video.addEventListener("playing",()=>{if("mediaSession" in navigator)try{navigator.mediaSession.playbackState="playing";}catch(e){}},{once:true});
+  video.addEventListener("pause",()=>{if("mediaSession" in navigator)try{navigator.mediaSession.playbackState="paused";}catch(e){}},{once:true});
   if(/\.m3u8($|\?)/i.test(item.url)&&window.Hls&&Hls.isSupported()){
    hls=new Hls();hls.loadSource(item.url);hls.attachMedia(video);hls.on(Hls.Events.MANIFEST_PARSED,()=>video.play().catch(()=>{}));
   }else if(video.canPlayType('application/vnd.apple.mpegurl')||!(/\.m3u8($|\?)/i.test(item.url))){
