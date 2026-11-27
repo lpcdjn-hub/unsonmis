@@ -472,6 +472,14 @@
   .card-item .item-title { overflow-wrap:anywhere; }
 
   .hidden { display: none !important; }
+  .cinema-panel { max-width: 1100px; margin: 18px auto 0; padding: 14px; background: #171717; border: 1px solid #6d4bb3; border-radius: 14px; }
+  .cinema-heading { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:12px; }
+  .cinema-heading h2 { margin:3px 0; color:#d8c6ff; font-size:1.35rem; }
+  .cinema-heading p,.cinema-note { color:#aaa; font-size:.82rem; margin:4px 0; }
+  .cinema-eyebrow { color:#bda1ff; font-size:.68rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; }
+  .cinema-heading a { color:#fff; background:#6d42bb; border-radius:20px; padding:8px 12px; text-decoration:none; font-size:.8rem; font-weight:700; }
+  .cinema-frame { display:block; width:100%; height:calc(100vh - 230px); min-height:650px; border:1px solid #393044; border-radius:10px; background:#101018; }
+  @media(max-width:650px) { .tabs { overflow-x:auto; justify-content:flex-start; } .tab-btn { min-width:145px; flex:0 0 auto; } .cinema-panel { padding:9px; } .cinema-frame { height:75vh; min-height:560px; } }
 .cross-promo{max-width:900px;margin:18px auto 0;padding:16px;display:flex;align-items:center;gap:14px;text-align:left;background:linear-gradient(110deg,#211b1b,#171717);border:1px solid #6d3030;border-radius:14px}.cross-promo-icon{width:52px;height:52px;flex:none;display:grid;place-items:center;border-radius:13px;background:linear-gradient(135deg,#d92525,#7f1717);font-size:26px}.cross-promo-text{flex:1;min-width:0}.cross-promo-text>span{color:#f2b705;font-size:.68rem;font-weight:850;letter-spacing:.15em}.cross-promo-text h2{font-size:1rem;margin:3px 0 5px}.cross-promo-text p{font-size:.78rem;line-height:1.5;color:#bbb;margin:0}.cross-promo-actions{display:flex;flex-direction:column;gap:7px;min-width:165px}.cross-promo-actions a,.cross-promo-actions button{display:block;text-align:center;text-decoration:none;border:1px solid #d92525;border-radius:20px;padding:8px 11px;background:#d92525;color:#fff;font:inherit;font-size:.78rem;font-weight:800;cursor:pointer}.cross-promo-actions button{background:#252525;border-color:#555;color:#f2b705}@media(max-width:650px){.cross-promo{flex-wrap:wrap}.cross-promo-text{flex:1 1 calc(100% - 68px)}.cross-promo-actions{width:100%;flex-direction:row;flex-wrap:wrap}.cross-promo-actions>*{flex:1;min-width:145px}}\n.cross-promo{max-width:900px;margin:18px auto;padding:16px;display:flex;align-items:center;gap:14px;text-align:left;background:linear-gradient(110deg,#142c20,#171b18);border:1px solid #34734a;border-radius:14px}.cross-promo-icon{width:52px;height:52px;flex:none;display:grid;place-items:center;border-radius:13px;background:linear-gradient(135deg,#23884b,#9bd66c);font-size:26px}.cross-promo-text{flex:1;min-width:0}.cross-promo-text>span{color:#a7e4b7;font-size:.68rem;font-weight:850;letter-spacing:.15em}.cross-promo-text h2{font-size:1rem;margin:3px 0 5px}.cross-promo-text p{font-size:.78rem;line-height:1.5;color:#c5d2c8;margin:0}.cross-promo-actions{display:flex;flex-direction:column;gap:7px;min-width:165px}.cross-promo-actions a,.cross-promo-actions button{display:block;text-align:center;text-decoration:none;border:1px solid #45a568;border-radius:20px;padding:8px 11px;background:#237b45;color:#fff;font:inherit;font-size:.78rem;font-weight:800;cursor:pointer}.cross-promo-actions button{background:#252925;border-color:#58715e;color:#bce9c7}@media(max-width:650px){.cross-promo{flex-wrap:wrap}.cross-promo-text{flex:1 1 calc(100% - 68px)}.cross-promo-actions{width:100%;flex-direction:row;flex-wrap:wrap}.cross-promo-actions>*{flex:1;min-width:145px}}
 /* Liens directs vers les autres applications : visibles dès l'accueil */
 .app-project-links{display:block!important;max-width:900px;margin:14px auto 18px;padding:14px 16px;background:#142c20;border:1px solid #34734a;border-radius:14px;color:#d9f5e1}
@@ -508,6 +516,7 @@
   <button class="tab-btn" data-tab="tracks">🎵 Découvertes Audius</button>
   <button class="tab-btn" data-tab="local">💾 Mes Sons (<span id="localCount">0</span>)</button>
   <button class="tab-btn" data-tab="favorites">⭐ Mes Favoris (<span id="favoriteCount">0</span>)</button>
+  <button class="tab-btn" data-tab="cinema">🎬 Cinéma</button>
 </div>
 
 <div class="container">
@@ -586,6 +595,14 @@
     <div class="track-list" id="favoritesList"></div>
   </div>
 
+  <section id="tab-cinema" class="hidden cinema-panel" aria-label="CinéLibre intégré">
+    <div class="cinema-heading">
+      <div><span class="cinema-eyebrow">UNSONMIS présente</span><h2>🎬 CinéLibre</h2><p>Films, séries, documentaires et chaînes gratuites, selon les droits et les diffuseurs.</p></div>
+      <a href="https://lpcdjn-hub.github.io/cinelibre/" target="_blank" rel="noopener noreferrer">Ouvrir séparément ↗</a>
+    </div>
+    <iframe class="cinema-frame" src="https://lpcdjn-hub.github.io/cinelibre/" title="CinéLibre — films, séries et chaînes" loading="lazy" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+    <p class="cinema-note">La lecture reste fournie par les plateformes et diffuseurs d’origine. Certains contenus peuvent varier selon le pays.</p>
+  </section>
 </div>
 
 <!-- PLAYER BAR -->
@@ -1358,6 +1375,8 @@ function switchTab(tabName) {
   document.getElementById("tab-tracks").classList.toggle("hidden", tabName !== "tracks");
   document.getElementById("tab-local").classList.toggle("hidden", tabName !== "local");
   document.getElementById("tab-favorites").classList.toggle("hidden", tabName !== "favorites");
+  document.getElementById("tab-cinema").classList.toggle("hidden", tabName !== "cinema");
+  document.querySelector(".player-bar").classList.toggle("hidden", tabName === "cinema");
   if (tabName === "favorites") renderFavorites();
 }
 
@@ -1408,8 +1427,7 @@ try {
   console.warn("Lien de contenu partagé invalide", error);
 }
 initAudius().then(() => searchTracks("tekno tribe acid"));
-\ndocument.getElementById('shareCineLibre')?.addEventListener('click',async()=>{const data={title:'CinéLibre — Films, séries et chaînes gratuites',text:'Découvre CinéLibre : un projet indépendant pour explorer des films du domaine public ou sous licences Creative Commons, des fiches de séries et des chaînes gratuites. La lecture est intégrée quand les diffuseurs l’autorisent. Disponibilité selon les pays et les sources.',url:'https://lpcdjn-hub.github.io/cinelibre/'};try{if(navigator.share)await navigator.share(data);else if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(data.text+' '+data.url);alert('Présentation et lien CinéLibre copiés !');}else prompt('Copie ce texte et ce lien :',data.text+' '+data.url);}catch(e){if(e.name!=='AbortError')alert('Le partage n’a pas pu être ouvert.');}});\ndocument.getElementById('shareGrandPartage')?.addEventListener('click',async()=>{const data={title:'Le Grand Partage — Donner · Partager · Recommencer',text:'Découvre Le Grand Partage : une plateforme gratuite de partage entre particuliers pour donner une seconde vie aux objets et favoriser l’entraide. Un projet indépendant créé par Lauris Coucaud.',url:'https://lpcdjn-hub.github.io/le-grand-partage/'};try{if(navigator.share)await navigator.share(data);else if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(data.text+' '+data.url);alert('Présentation et lien Le Grand Partage copiés !');}else prompt('Copie ce texte et ce lien :',data.text+' '+data.url);}catch(e){if(e.name!=='AbortError')alert('Le partage n’a pas pu être ouvert.');}});
-document.querySelectorAll('[data-share-project]').forEach(button=>button.addEventListener('click',async()=>{
+\ndocument.querySelectorAll('[data-share-project]').forEach(button=>button.addEventListener('click',async()=>{
  const id=button.dataset.shareProject;
  const projects={
  lgp:{title:'Le Grand Partage',text:"Une plateforme gratuite de partage entre particuliers pour donner une seconde vie aux objets et favoriser l’entraide.",url:"https://lpcdjn-hub.github.io/le-grand-partage/"},
