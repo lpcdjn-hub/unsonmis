@@ -1421,6 +1421,39 @@ html::before, html::after {
   content: none !important;
   display: none !important;
 }
+
+/* FINITION SOBRE — réduction des néons trop puissants */
+*, *::before, *::after {
+  text-shadow: none !important;
+  filter: none !important;
+}
+header, .brand-banner, .top-actions .action-pill,
+.app-project-links, .app-project-link-list a,
+.player-bar, #visualizer, #shuffleBtn, #loopBtn, .play-main,
+.container, .community-panel, .member-panel, .card-item,
+.custom-radio-form, .music-tv-player-box {
+  box-shadow: none !important;
+}
+.top-actions .action-pill.primary,
+.top-actions .action-pill:not(.red),
+.top-actions .action-pill.red,
+.app-project-links,
+.app-project-link-list a,
+#visualizer, .play-main {
+  border-color: rgba(210,210,210,.72) !important;
+}
+.top-actions .action-pill.primary,
+.top-actions .action-pill.red,
+.app-project-links,
+.app-project-link-list a {
+  background: rgba(8,8,8,.96) !important;
+}
+.app-project-link-list a {
+  color: #f2f2f2 !important;
+}
+.np-title, .tagline, .founder-credit strong {
+  text-shadow: none !important;
+}
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
