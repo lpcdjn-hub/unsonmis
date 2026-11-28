@@ -1407,6 +1407,20 @@ header{
   body{padding-bottom:190px!important}
 }
 
+
+/* FIX FINAL — suppression définitive du fond image UNSONMIS */
+html, html body, body {
+  background-color: #050508 !important;
+  background-image: none !important;
+  background: #050508 !important;
+  background-attachment: scroll !important;
+}
+body::before, body::after,
+html::before, html::after {
+  background-image: none !important;
+  content: none !important;
+  display: none !important;
+}
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
