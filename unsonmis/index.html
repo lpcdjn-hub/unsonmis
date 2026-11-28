@@ -1267,14 +1267,13 @@ body{background-image:url("./assets/graffiti-wall.svg?v=6")!important}
 /* Le décor de scène original contient plafond fissuré, DJ, enceintes, couronne et sol égaliseur. */
 html,body{
   min-height:100%!important;
-  background:#050508 url("./assets/graffiti-wall.svg?v=6") center top / 100% 100vh fixed no-repeat!important;
+  background:#050508!important;
+  background-image:none!important;
 }
 body{
-  background-image:url("./assets/graffiti-wall.svg?v=6")!important;
-  background-position:center top!important;
-  background-size:100% 100vh!important;
-  background-repeat:no-repeat!important;
-  background-attachment:fixed!important;
+  background:#050508!important;
+  background-image:none!important;
+  background-attachment:scroll!important;
   padding-bottom:205px!important;
 }
 body::before,body::after{display:none!important;content:none!important;opacity:0!important}
@@ -1392,7 +1391,7 @@ header{
 .progress-row{font-size:clamp(.72rem,3vw,.88rem)!important;color:#fff!important;gap:7px!important}
 .progress-row input[type=range]{accent-color:#ffe000!important;height:6px!important}
 @media(max-width:600px){
-  html,body{background-size:100% 100vh!important;background-position:center top!important}
+  html,body{background:#050508!important;background-image:none!important}
   header{padding:8px 8px 10px!important}
   .brand-banner{width:min(calc(100% - 78px),620px)!important;aspect-ratio:2.18/1!important}
   .tagline{font-size:clamp(.78rem,4.3vw,1.12rem)!important}
@@ -1417,7 +1416,7 @@ header{
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
 
-<link rel="preload" as="image" href="./assets/graffiti-wall.svg?v=6">
+
 </head>
 <body>
 
