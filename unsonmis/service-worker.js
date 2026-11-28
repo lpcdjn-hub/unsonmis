@@ -1,4 +1,4 @@
-const CACHE_NAME = "unsonmis-shell-v24";
+const CACHE_NAME = "unsonmis-shell-v25";
 const APP_SHELL = [
   "./",
   "./index.html",
