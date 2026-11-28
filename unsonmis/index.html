@@ -1262,6 +1262,152 @@ body{background-image:url("./assets/rave-stage-birthday.svg?v=1")!important}
  .app-project-link-list a{min-height:43px!important;padding:6px 10px!important;font-size:.86rem!important}
 }
 
+
+/* === MAQUETTE DE RÉFÉRENCE EXACTE — UNSONMIS === */
+/* Le décor de scène original contient plafond fissuré, DJ, enceintes, couronne et sol égaliseur. */
+html,body{
+  min-height:100%!important;
+  background:#050508 url("./assets/graffiti-wall.svg?v=6") center top / 100% 100vh fixed no-repeat!important;
+}
+body{
+  background-image:url("./assets/graffiti-wall.svg?v=6")!important;
+  background-position:center top!important;
+  background-size:100% 100vh!important;
+  background-repeat:no-repeat!important;
+  background-attachment:fixed!important;
+  padding-bottom:205px!important;
+}
+body::before,body::after{display:none!important;content:none!important;opacity:0!important}
+header{
+  position:relative!important;
+  top:auto!important;
+  padding:8px 10px 10px!important;
+  background:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.12))!important;
+  border-bottom:3px solid #ff173b!important;
+  box-shadow:0 5px 22px rgba(255,0,45,.4)!important;
+  backdrop-filter:none!important;
+}
+.brand-banner{
+  width:min(calc(100% - 80px),620px)!important;
+  max-width:620px!important;
+  height:auto!important;
+  aspect-ratio:2.18/1!important;
+  margin:0 auto 8px!important;
+  border:5px solid #777!important;
+  border-radius:22px!important;
+  box-shadow:0 0 12px rgba(255,255,255,.55),0 0 25px rgba(255,0,65,.4)!important;
+}
+.brand-banner img{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center!important}
+.tagline{
+  margin:7px auto 0!important;
+  color:#ffe500!important;
+  font-size:clamp(.82rem,4.3vw,1.25rem)!important;
+  line-height:1.16!important;
+  white-space:nowrap!important;
+  text-shadow:0 0 8px #ffdb00,0 2px 4px #000!important;
+}
+.founder-credit{
+  margin:7px auto 0!important;
+  color:#fff!important;
+  font-size:clamp(.66rem,3.15vw,.98rem)!important;
+  line-height:1.2!important;
+  white-space:nowrap!important;
+  text-shadow:0 2px 5px #000!important;
+}
+.founder-credit strong{color:#ff263e!important}
+.top-actions{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  width:min(calc(100% - 58px),620px)!important;
+  max-width:620px!important;
+  margin:12px auto 0!important;
+  gap:8px!important;
+}
+.top-actions .action-pill{
+  width:100%!important;
+  min-height:clamp(36px,10vw,52px)!important;
+  padding:7px 12px!important;
+  border-radius:38px!important;
+  background:rgba(0,0,0,.9)!important;
+  color:#fff!important;
+  font-size:clamp(.82rem,4.1vw,1.2rem)!important;
+  line-height:1.12!important;
+  text-shadow:0 2px 4px #000!important;
+}
+.top-actions .action-pill.primary{border:3px solid #ffe600!important;box-shadow:0 0 9px #ffe600,0 0 20px rgba(255,230,0,.55)!important;color:#ffe600!important}
+.top-actions .action-pill:not(.primary):not(.red){border:3px solid #fff!important;box-shadow:0 0 9px #fff,0 0 20px rgba(255,255,255,.5)!important}
+.top-actions .action-pill.red{border:3px solid #ff1838!important;box-shadow:0 0 9px #ff1838,0 0 20px rgba(255,0,40,.65)!important}
+.app-project-links{
+  display:block!important;
+  width:calc(100% - 30px)!important;
+  max-width:680px!important;
+  box-sizing:border-box!important;
+  margin:12px auto 16px!important;
+  padding:9px!important;
+  background:rgba(0,8,2,.91)!important;
+  border:3px solid #00f044!important;
+  border-radius:25px!important;
+  box-shadow:0 0 12px #00f044,0 0 28px rgba(0,255,60,.55)!important;
+}
+.app-project-links>strong{
+  display:block!important;
+  color:#fff!important;
+  font-size:clamp(.82rem,4vw,1.22rem)!important;
+  line-height:1.22!important;
+  text-align:center!important;
+  text-shadow:0 0 10px #00ff50!important;
+}
+.app-project-link-list{display:grid!important;grid-template-columns:1fr!important;gap:7px!important;margin-top:8px!important}
+.app-project-link-list a{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  min-height:clamp(39px,11vw,58px)!important;
+  padding:7px 14px!important;
+  background:linear-gradient(90deg,rgba(0,75,25,.97),rgba(0,135,40,.97))!important;
+  border:2px solid #20ff50!important;
+  border-radius:17px!important;
+  box-shadow:0 0 8px #00ff4c,inset 0 0 14px rgba(0,255,70,.24)!important;
+  color:#fff!important;
+  font-size:clamp(.88rem,4.2vw,1.24rem)!important;
+  text-shadow:0 1px 4px #000!important;
+}
+.container{background:rgba(0,0,0,.16)!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important}
+.player-bar{
+  padding:8px 10px calc(9px + env(safe-area-inset-bottom))!important;
+  background:rgba(0,0,0,.98)!important;
+  border-top:4px solid #ff173b!important;
+  box-shadow:0 -5px 22px rgba(255,0,40,.58)!important;
+  backdrop-filter:none!important;
+}
+.player-top{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:8px!important}
+.now-playing{min-width:0!important;flex:1 1 68%!important}
+.np-title{font-size:clamp(.92rem,4vw,1.24rem)!important;color:#ffe000!important;white-space:nowrap!important;text-shadow:0 0 8px rgba(255,210,0,.4)!important}
+.np-artist{font-size:clamp(.72rem,3vw,.94rem)!important;color:#eee!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+#visualizer{width:32%!important;height:38px!important;flex:0 0 32%!important;border:2px solid #ff2638!important;border-radius:10px!important;box-shadow:0 0 9px rgba(255,0,35,.7)!important;background:#080808!important}
+.controls-row{display:flex!important;align-items:center!important;justify-content:center!important;gap:clamp(9px,4vw,22px)!important;margin:7px 0!important}
+.ctrl-btn{font-size:clamp(1.15rem,5vw,1.55rem)!important;text-shadow:0 0 7px rgba(255,255,255,.35)!important}
+#shuffleBtn,#loopBtn{background:linear-gradient(135deg,#ffdf35,#e89b00)!important;color:#161000!important;border-radius:10px!important;padding:7px 10px!important;box-shadow:0 0 10px rgba(255,190,0,.5)!important}
+.play-main{width:clamp(58px,18vw,76px)!important;height:clamp(58px,18vw,76px)!important;border:3px solid #ff8791!important;background:radial-gradient(circle,#ff3547,#b90019)!important;border-radius:50%!important;font-size:1.8rem!important;box-shadow:0 0 10px #ff1d32,0 0 22px rgba(255,0,35,.65)!important}
+.progress-row{font-size:clamp(.72rem,3vw,.88rem)!important;color:#fff!important;gap:7px!important}
+.progress-row input[type=range]{accent-color:#ffe000!important;height:6px!important}
+@media(max-width:600px){
+  html,body{background-size:100% 100vh!important;background-position:center top!important}
+  header{padding:8px 8px 10px!important}
+  .brand-banner{width:min(calc(100% - 78px),620px)!important;aspect-ratio:2.18/1!important}
+  .tagline{font-size:clamp(.78rem,4.3vw,1.12rem)!important}
+  .founder-credit{font-size:clamp(.64rem,3.05vw,.88rem)!important}
+  .top-actions{width:calc(100% - 58px)!important;margin-top:11px!important;gap:7px!important}
+  .top-actions .action-pill{min-height:clamp(36px,10vw,45px)!important}
+  .app-project-links{width:calc(100% - 26px)!important;margin:11px auto 14px!important;padding:8px!important}
+  .app-project-links>strong{font-size:clamp(.8rem,4vw,.98rem)!important}
+  .app-project-link-list a{min-height:clamp(39px,11vw,48px)!important;font-size:clamp(.86rem,4.2vw,1rem)!important}
+  .player-bar{padding:7px 9px calc(8px + env(safe-area-inset-bottom))!important}
+  .play-main{width:clamp(58px,18vw,68px)!important;height:clamp(58px,18vw,68px)!important}
+  .controls-row{gap:clamp(8px,3.6vw,15px)!important;margin:6px 0!important}
+  body{padding-bottom:190px!important}
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -1271,7 +1417,7 @@ body{background-image:url("./assets/rave-stage-birthday.svg?v=1")!important}
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
 
-<link rel="preload" as="image" href="./assets/rave-stage-birthday.svg?v=1">
+<link rel="preload" as="image" href="./assets/graffiti-wall.svg?v=6">
 </head>
 <body>
 
