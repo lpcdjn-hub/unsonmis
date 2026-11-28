@@ -1105,6 +1105,121 @@ header{
  .app-project-links{margin:12px 10px 14px!important;padding:12px!important}
 }
 
+
+/* === UNSONMIS — correction mobile finale : décor SVG + slogan entier === */
+/* Le décor vectoriel détaillé est la seule image de fond active */
+html,body{
+  min-height:100%!important;
+  background-color:#050508!important;
+  background-image:url("./assets/graffiti-wall.svg?v=5")!important;
+  background-position:center top!important;
+  background-size:cover!important;
+  background-repeat:no-repeat!important;
+  background-attachment:fixed!important;
+}
+body{
+  background-image:url("./assets/graffiti-wall.svg?v=5")!important;
+  background-position:center top!important;
+  background-size:cover!important;
+  background-repeat:no-repeat!important;
+  background-attachment:fixed!important;
+  overflow-x:hidden!important;
+}
+body::before,body::after{display:none!important;opacity:0!important}
+header{
+  width:100%!important;max-width:none!important;
+  box-sizing:border-box!important;overflow:visible!important;
+  padding:10px 12px 14px!important;
+  background:rgba(0,0,0,.12)!important;
+  border-bottom:3px solid #ff173b!important;
+}
+.brand-banner{
+  width:calc(100% - 8px)!important;
+  max-width:620px!important;
+  aspect-ratio:1.75 / 1!important;
+  height:auto!important;max-height:none!important;
+  margin:0 auto 10px!important;
+  overflow:hidden!important;
+}
+.brand-banner img{
+  width:100%!important;height:100%!important;
+  object-fit:cover!important;object-position:center!important;
+}
+.tagline{
+  display:block!important;
+  width:100%!important;max-width:680px!important;
+  box-sizing:border-box!important;
+  margin:7px auto 0!important;padding:0 4px!important;
+  color:#ffe500!important;
+  text-align:center!important;
+  white-space:normal!important;
+  overflow:visible!important;text-overflow:clip!important;
+  overflow-wrap:normal!important;word-break:normal!important;
+  font-size:clamp(.82rem,3.8vw,1.42rem)!important;
+  line-height:1.22!important;letter-spacing:0!important;
+  text-shadow:0 0 7px #ffcf00,0 2px 5px #000!important;
+}
+.founder-credit{
+  width:100%!important;max-width:680px!important;
+  box-sizing:border-box!important;
+  margin:8px auto 0!important;padding:0 4px!important;
+  text-align:center!important;white-space:normal!important;
+  line-height:1.3!important;
+}
+.top-actions{
+  width:100%!important;max-width:620px!important;
+  box-sizing:border-box!important;
+  margin:14px auto 0!important;padding:0 2px!important;
+  display:flex!important;flex-direction:column!important;
+  gap:10px!important;
+}
+.top-actions .action-pill{
+  width:100%!important;min-height:clamp(52px,8vw,68px)!important;
+  box-sizing:border-box!important;justify-content:center!important;
+  padding:10px 14px!important;border-radius:36px!important;
+  font-size:clamp(.86rem,3.5vw,1.2rem)!important;
+  white-space:normal!important;text-align:center!important;
+}
+.app-project-links{
+  width:calc(100% - 24px)!important;max-width:660px!important;
+  box-sizing:border-box!important;margin:14px auto 18px!important;
+  padding:14px!important;
+  background:rgba(0,8,2,.92)!important;
+  border:3px solid #00f044!important;border-radius:24px!important;
+  box-shadow:0 0 12px #00f044,0 0 28px rgba(0,255,60,.55)!important;
+}
+.app-project-link-list{grid-template-columns:1fr!important}
+.app-project-link-list a{
+  min-height:54px!important;padding:9px 14px!important;
+  flex-direction:row!important;justify-content:space-between!important;
+  border:2px solid #20ff50!important;
+  background:linear-gradient(90deg,rgba(0,75,25,.97),rgba(0,135,40,.97))!important;
+  box-shadow:0 0 8px #00ff4c,inset 0 0 14px rgba(0,255,70,.24)!important;
+}
+.container{background:rgba(0,0,0,.10)!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;padding-bottom:230px!important}
+.player-bar{
+  background:rgba(0,0,0,.97)!important;
+  border-top:4px solid #ff173b!important;
+  box-shadow:0 -5px 22px rgba(255,0,40,.58)!important;
+}
+@media(max-width:600px){
+  html,body{
+    background-image:url("./assets/graffiti-wall.svg?v=5")!important;
+    background-position:center top!important;
+    background-size:cover!important;
+    background-attachment:fixed!important;
+  }
+  header{padding:8px 9px 12px!important}
+  .brand-banner{width:100%!important;aspect-ratio:1.75 / 1!important}
+  .tagline{font-size:clamp(.78rem,4vw,1.02rem)!important;line-height:1.25!important}
+  .founder-credit{font-size:clamp(.65rem,3vw,.84rem)!important}
+  .top-actions{margin-top:12px!important;gap:9px!important}
+  .top-actions .action-pill{min-height:52px!important;font-size:clamp(.82rem,3.8vw,1rem)!important}
+  .app-project-links{width:calc(100% - 20px)!important;margin:12px auto 16px!important;padding:11px!important}
+  .app-project-link-list a{min-height:52px!important;font-size:.92rem!important}
+  .container{padding-bottom:240px!important}
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
