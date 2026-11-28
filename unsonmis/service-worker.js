@@ -1,9 +1,10 @@
-const CACHE_NAME = "unsonmis-shell-v19";
+const CACHE_NAME = "unsonmis-shell-v20";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./assets/graffiti-wall.svg",
+  "./assets/unsonmis-rave-background.jpg?v=1",
   "./assets/graffiti-background.jpg?v=3",
   "./icons/icon-192.png",
   "./icons/icon-512.png"
